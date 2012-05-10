@@ -21,9 +21,9 @@
 
 (defmacro with-condition-translation
     ((&key
-      (var            (gensym)                             var-supplied?)
+      (var            (gensym)                          var-supplied?)
       (from-condition 'error)
-      (to-condition   (required-argument :condition-class))
+      (to-condition   (missing-required-argument :to-condition))
       initargs
       (cause-initarg  :cause)
       (signal-via     'error))
