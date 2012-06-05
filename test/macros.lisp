@@ -52,7 +52,7 @@ system."))
 
   (let ((source (make-condition 'source-condition)))
    (handler-case
-       (with-condition-translation (:to-condition target-condition/no-cause)
+       (with-condition-translation (((error target-condition/no-cause)))
 	 (error source))
      (target-condition/no-cause (condition)
        (ensure-same (target-condition-slot condition) :default)))))
@@ -64,7 +64,7 @@ system."))
 
   (let ((source (make-condition 'source-condition)))
     (handler-case
-	(with-condition-translation (:to-condition target-condition/cause)
+	(with-condition-translation (((error target-condition/cause)))
 	  (error source))
       (target-condition/cause (condition)
 	(ensure-same (target-condition-slot condition) :default)
@@ -77,14 +77,14 @@ system."))
    (defmethod foo ((bar t))
      (error bar))
    (define-condition-translating-method foo ((bar t))
-     :to-condition target-condition/cause)
+     ((error target-condition/cause)))
 
    (defmethod foo/initargs ((bar t))
      (error bar))
    (define-condition-translating-method foo/initargs ((bar t))
-     :to-condition  target-condition/no-cause
-     :initargs      (:slot :supplied)
-     :cause-initarg nil))
+     ((error target-condition/no-cause
+       :cause-initarg nil)
+      :slot :supplied)))
   (:teardown
    (fmakunbound 'foo)
    (fmakunbound 'foo/initargs))
