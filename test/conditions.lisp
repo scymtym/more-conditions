@@ -1,4 +1,4 @@
-;;; conditions.lisp --- Unit tests for conditions provided by the cl-more-conditions system.
+;;; conditions.lisp --- Unit tests for conditions provided by the more-conditions system.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -23,7 +23,7 @@
   ()
   (:documentation
    "Root test suite for conditions and condition-related helper
-functions provided by the cl-more-conditions system."))
+functions provided by the more-conditions system."))
 
 (deftestsuite maybe-print-cause-root (conditions-root)
   ()

@@ -1,4 +1,4 @@
-;;; conditions.lisp --- Conditions provided by the cl-more-conditions system.
+;;; conditions.lisp --- Conditions provided by the more-conditions system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

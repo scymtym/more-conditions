@@ -1,4 +1,4 @@
-;;; macros.lisp --- Unit tests for the macros provided by the cl-more-conditions system.
+;;; macros.lisp --- Unit tests for the macros provided by the more-conditions system.
 ;;
 ;; Copyright (C) 2012 Jan Moringen
 ;;
@@ -37,7 +37,7 @@
 		:reader   target-condition-slot
 		:initform :default))))))
   (:documentation
-   "Test suite for macros provided by the cl-more-conditions
+   "Test suite for macros provided by the more-conditions
 system."))
 
 (deftestsuite with-condition-translation-root (macros-root)
@@ -58,8 +58,8 @@ system."))
        (ensure-same (target-condition-slot condition) :default)))))
 
 (addtest (with-condition-translation-root
-	     :documentation
-	   "TODO(jmoringe): document")
+	  :documentation
+	  "TODO(jmoringe): document")
   smoke/cause
 
   (let ((source (make-condition 'source-condition)))
@@ -92,7 +92,7 @@ system."))
    "Test suite for the `define-condition-translating-method' macro."))
 
 (addtest (define-condition-translating-method-root
-          :documentation
+	  :documentation
 	  "TODO(jmoringe): document")
   smoke/cause
 

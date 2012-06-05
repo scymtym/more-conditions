@@ -57,7 +57,7 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LLGPL3; see COPYING file for details."
+  :license     "LLGPLv3; see COPYING file for details."
   :description "This system provides some generic condition classes in
 conjunction with support functions and macros."
   :depends-on  (:alexandria)
@@ -73,9 +73,9 @@ conjunction with support functions and macros."
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
-  :license     "LLGPL3; see COPYING file for details."
+  :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the more-conditions system."
-  :depends-on  (:cl-more-conditions
+  :depends-on  (:more-conditions
 		:lift)
   :components  ((:module     "test"
 		 :serial     t

@@ -1,4 +1,4 @@
-;;; package.lisp --- Package definition for the cl-more-conditions system.
+;;; package.lisp --- Package definition for the more-conditions system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

@@ -1,4 +1,4 @@
-;;; macros.lisp --- Macros provided by the cl-more-conditions system.
+;;; macros.lisp --- Macros provided by the more-conditions system.
 ;;
 ;; Copyright (C) 2011, 2012 Jan Moringen
 ;;

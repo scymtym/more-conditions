@@ -1,6 +1,6 @@
-;;; package.lisp --- Package definition for unit tests of the cl-more-conditions system.
+;;; package.lisp --- Package definition for unit tests of the more-conditions system.
 ;;
-;; Copyright (C) 2011 Jan Moringen
+;; Copyright (C) 2011, 2012 Jan Moringen
 ;;
 ;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 ;;
