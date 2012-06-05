@@ -43,11 +43,12 @@ system."))
 (deftestsuite with-condition-translation-root (macros-root)
   ()
   (:documentation
-   "TODO(jmoringe): document"))
+   "Unit tests for `with-condition-translation' macro."))
 
 (addtest (with-condition-translation-root
-          :documentation
-	  "TODO(jmoringe): document")
+	  :documentation
+	  "Smoke test for translating `error' to a condition class
+without cause storage via `with-condition-translation'.")
   smoke/no-cause
 
   (let ((source (make-condition 'source-condition)))
@@ -59,7 +60,8 @@ system."))
 
 (addtest (with-condition-translation-root
 	  :documentation
-	  "TODO(jmoringe): document")
+	   "Smoke test for translating `error' to a condition class
+with cause storage via `with-condition-translation'.")
   smoke/cause
 
   (let ((source (make-condition 'source-condition)))
@@ -93,7 +95,9 @@ system."))
 
 (addtest (define-condition-translating-method-root
 	  :documentation
-	  "TODO(jmoringe): document")
+	  "Smoke test for defining a condition translating method with
+capturing of the causing condition via
+`define-condition-translating-method.'")
   smoke/cause
 
   (let ((source (make-condition 'source-condition)))
@@ -106,7 +110,9 @@ system."))
 
 (addtest (define-condition-translating-method-root
 	  :documentation
-	  "TODO(jmoringe): document")
+	     "Smoke test for defining a condition translating method
+which adds additional initargs via
+`define-condition-translating-method.'")
   smoke/initargs
 
   (let ((source (make-condition 'source-condition)))
