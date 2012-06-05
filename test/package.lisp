@@ -20,6 +20,7 @@
 (cl:defpackage :more-conditions.test
   (:use
    :cl
+   :alexandria
    :lift
 
    :more-conditions)

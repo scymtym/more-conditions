@@ -120,11 +120,11 @@ have been supplied.")
 	       "A list of the incompatible values."))
   (:report
    (lambda (condition stream)
-     (format stream "~@<Invalid combination of arguments: ~{~{~A = ~
-~A~}~^, ~}.~@:>"
-	     (map 'list #'list
-		  (incompatible-arguments-parameters condition)
-		  (incompatible-arguments-values     condition)))))
+     (let ((parameters (incompatible-arguments-parameters condition))
+	   (values     (incompatible-arguments-values     condition)))
+      (format stream "~@<~:[No arguments are~;~:*The combination of ~
+arguments~&~/more-conditions::print-arguments/~2&is~] invalid.~:>"
+	      (when parameters (list parameters values))))))
   (:documentation
    "This error is signaled when an incompatible combination of
 arguments is supplied."))
@@ -184,12 +184,12 @@ is not supplied."))
   ()
   (:report
    (lambda (condition stream)
-     (format stream "~@<The combination of initargs ~{~{~S = ~A~}~^, ~} ~
-is invalid for class ~S.~@:>"
-	     (map 'list #'list
-		  (incompatible-arguments-parameters condition)
-		  (incompatible-arguments-values     condition))
-	     (initarg-error-class condition))))
+     (let ((parameters (incompatible-arguments-parameters condition))
+	   (values     (incompatible-arguments-values     condition)))
+       (format stream "~@<~:[No initargs are~;~:*The combination of ~
+initargs~&~/more-conditions::print-arguments/~2&is~] invalid for class ~S.~@>"
+	      (when parameters (list parameters values))
+	      (initarg-error-class condition)))))
   (:documentation
    "This error is signaled when incompatible initargs are supplied."))
 
@@ -203,3 +203,23 @@ is invalid for class ~S.~@:>"
 	   :parameters parameters
 	   :values     values
 	   :class      class)))
+
+
+;;; Utility functions
+;;
+
+(defun print-arguments (stream parameters-and-values &optional at? colon?)
+  "Print PARAMETERS-AND-VALUES which has to be of the form
+
+  (PARAMETERS VALUES)
+
+onto STREAM. AT? and COLON? are ignored."
+  (declare (ignore at? colon?))
+  (destructuring-bind (parameters values) parameters-and-values
+    (let ((max-name-length
+	   (reduce #'max parameters
+		   :key           (compose #'length #'prin1-to-string)
+		   :initial-value 0)))
+      (format stream "~:{~,,1<~%~2@T~VS~@;~A~>~}"
+	      (mapcar #'list
+		      (circular-list max-name-length) parameters values)))))
