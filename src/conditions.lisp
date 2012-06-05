@@ -23,6 +23,20 @@
 ;;; Generic condition utilities
 ;;
 
+(defgeneric cause (condition)
+  (:method ((condition condition))
+    nil)
+  (:documentation
+   "Return the condition that was signaled and caused CONDITION to be
+signaled."))
+
+(defgeneric root-cause (condition)
+  (:method ((condition condition))
+    condition)
+  (:documentation
+   "Return the condition that was originally signaled and eventually
+caused CONDITION to be signaled."))
+
 (define-condition chainable-condition (condition)
   ((cause :initarg  :cause
 	  :type     (or null condition)
@@ -37,16 +51,10 @@ which originally caused the condition to be signaled. This structure
 can continue recursively thus forming a chain of causing
 conditions."))
 
-(defgeneric root-cause (condition)
-  (:method ((condition condition))
-    condition)
-  (:method ((condition chainable-condition))
-    (if-let ((cause (cause condition)))
-      (root-cause cause)
-      condition))
-  (:documentation
-   "Return the condition that was originally signaled and eventually
-caused CONDITION to be signaled."))
+(defmethod root-cause ((condition chainable-condition))
+  (if-let ((cause (cause condition)))
+    (root-cause cause)
+    condition))
 
 (defun maybe-print-cause (stream condition &optional colon? at?)
   "Print the condition that caused CONDITION to be signaled (if any)
