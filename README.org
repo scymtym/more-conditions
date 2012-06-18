@@ -1,0 +1,118 @@
+* Introduction
+  The =more-conditions= system contains some condition classes and
+  helper functions which may be useful when building slightly complex
+  systems.
+
+  One aspect handled by these classes is "chaining" of
+  conditions. Chaining is one way to implement signaling and handling
+  of conditions in a layered architecture: layers handle (not
+  necessarily in the sense of unwinding the stack and transferring
+  control) conditions signaled from lower layers by wrapping them in
+  an appropriate condition class and re-signaling. Support for this
+  pattern is provided by the following classes, functions and macros:
+  + =chainable-condition=
+  + =cause= and =root-cause=
+  + =maybe-print-cause=
+  + =with-condition-translation=
+  + =define-condition-translating-method=
+  See [[*Condition Translation for Layered Systems]] below.
+
+  Another aspect are custom simple conditions. The function
+  =maybe-print-explanation= is intended to make writing report
+  functions for custom simple conditions easier.
+  See [[*Custom Simple Conditions]] below.
+
+  Finally, =more-conditions= provides a couple of specific
+  =program-error= s:
+  + =program-error=
+    + =missing-required-argument=
+      + =missing-required-initarg=
+    + =incompatible-arguments=
+      + =incompatible-initargs=
+    + =initarg-error=
+      + =missing-required-initarg=
+      + =incompatible-initargs=
+
+* Condition Translation for Layered Systems
+  Assume some complex backend whose primary entry point is a =emit
+  (NODE OPERATION TARGET)= function. Part of the backend interface is
+  an =emit-error= condition. In such a situation, it is desirable to
+  translate arbitrary conditions that may arise anywhere in the
+  backend into the =emit-error= condition without loosing information
+  regarding the root cause of the problem.
+
+  Using =more-conditions=, the problem can be solved as follows:
+  #+BEGIN_SRC lisp
+    (defgeneric emit (node operation target))
+
+    (define-condition emit-error (cl:error
+                                  more-conditions:chainable-condition)
+      ((node      :initarg :node
+                  :reader  node)
+       (operation :initarg :operation
+                  :reader  operation)
+       (target    :initarg :target
+                  :reader  target))
+      (:report (lambda (condition stream)
+                 (format stream "Could not ~A node ~A to target ~A~/more-conditions::maybe-print-cause/"
+                         (operation condition)
+                         (node condition)
+                         (target condition)
+                         condition))))
+
+    (more-conditions:define-condition-translating-method emit (node operation target)
+      ((error emit-error)
+       :node node
+       :operation operation
+       :target target))
+
+    (defmethod emit ((node real) (operation (eql :foo)) (target stream))
+      (when (minusp node)
+        (error "Cannot ~S for negative real node ~A."
+               operation node)))
+
+  #+END_SRC
+  This does the following:
+  + Translate any =error= condition into an =emit-error= condition
+  + Store the node, operation, target and causing condition in the
+    =emit-error= condition (can be retrieved via
+    =more-conditions:cause= or =more-conditions:root-cause=)
+  + Do not unwind the stack since translation is done in
+    =handler-bind= rather than =handler-case=. This way the client can
+    still determine the location of the causing condition.
+  + Avoid wrapping multiple =emit-error= s around each other in case
+    recursive =emit= calls.
+
+  Now =(emit -1 :foo *standard-output*)= signals an =emit-error= which
+  describes the failed operation and contains a detailed description
+  of the actual problem as its =more-conditions:cause=:
+  #+BEGIN_EXAMPLE
+  Could not FOO node -1 to target #<SLIME-OUTPUT-STREAM {1005DAF453}> Caused by:
+  > Cannot :FOO for negative real node -1.
+  #+END_EXAMPLE
+* Custom Simple Conditions
+  A custom simple conditions can be defined as follows:
+  #+BEGIN_SRC lisp
+    (define-condition simple-frob-error (cl:error
+                                         cl:simple-condition)
+      ((foo :initarg :foo
+            :reader  foo))
+      (:report (lambda (condition stream)
+                 (format stream "Could not frob ~S~/more-conditions::maybe-print-explanation/"
+                         (foo condition)
+                         condition))))
+
+    (defun simple-frob-error (foo &optional format &rest args)
+      (error 'simple-frob-error
+             :foo              foo
+             :format-control   format
+             :format-arguments args))
+  #+END_SRC
+  Now =(simple-frob-error :bar)= and =(simple-frob-error :bar "Fez
+  ~S." :whoop)= both produce nice reports.
+
+* settings							   :noexport:
+
+# Local Variables:
+# mode: org
+# End:
