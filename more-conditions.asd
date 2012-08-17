@@ -75,8 +75,8 @@ conjunction with support functions and macros."
   :version     #.(version/string)
   :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the more-conditions system."
-  :depends-on  (:more-conditions
-		:lift)
+  :depends-on  ((:version :more-conditions #. (version/string))
+		(:version :lift            "1.7.1"))
   :components  ((:module     "test"
 		 :serial     t
 		 :components ((:file       "package")
