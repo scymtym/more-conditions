@@ -47,8 +47,9 @@ conditions."))
   "Print the condition that caused CONDITION to be signaled (if any)
 onto STREAM."
   (declare (ignore colon? at?))
-  (format stream "~@[ ~_Caused by:~&~@<> ~@;~A~@:>~]"
-	  (cause condition)))
+  (let ((*print-references* (eq *print-references* :force)))
+    (format stream "~@[ ~_Caused by:~&~@<> ~@;~A~@:>~]"
+	    (cause condition))))
 
 (defun maybe-print-explanation (stream condition &optional colon? at?)
   "Format the message contained in the `simple-condition' CONDITION on
@@ -190,6 +191,63 @@ initargs~&~/more-conditions::print-arguments/~2&is~] invalid for class ~S.~:>"
 	   :parameters parameters
 	   :values     values
 	   :class      class)))
+
+
+;;; Class `reference-condition'
+;;
+
+(defun print-reference (stream spec &optional at? colon?)
+  "Print reference SPEC onto STREAM.
+AT? and COLON? are ignored."
+  (declare (ignore at? colon?))
+  (with-accessors ((document reference-document)
+		   (part     reference-part)
+		   (link     reference-link)) spec
+    (format stream "~A, ~{~A~^ » ~}~@[ <~A>~]"
+	    document (ensure-list part) link)))
+
+(defgeneric condition-references (condition)
+  (:documentation
+   "Return a list of references (of type `reference-spec') which are
+associated to CONDITION."))
+
+(defmethod condition-references ((condition t))
+  "Return nil since arbitrary objects do not have references
+associated to them."
+  nil)
+
+(defmethod condition-references :around ((condition chainable-condition))
+  "Merge references associated to CONDITION with those associated to
+the transitive causes of CONDITION."
+  (remove-duplicates
+   (append (when-let ((cause (cause condition)))
+	     (condition-references cause))
+	   (call-next-method))
+   :test     #'equal
+   :from-end t))
+
+;; Note: based on identically named class in SBCL's
+;; src/code/condition.lisp
+(define-condition reference-condition (condition)
+  ((references :initarg  :references
+	       :type     list ; of `reference-spec'
+	       :reader   condition-references
+	       :initform '()
+	       :documentation
+	       "Stores a list of references of type
+`reference-spec'."))
+  (:documentation
+   "This condition class is intended to be mixed into condition
+classes which can associate documentation references to their
+instances."))
+
+(defmethod print-object :after ((object reference-condition) stream)
+  (when (and (not *print-escape*) (not *print-readably*)
+	     *print-references*
+	     (condition-references object))
+    (format stream "~&See also:~%~<  ~@;~
+                    ~{~/more-conditions::print-reference/~^~%~}~:>"
+	    (list (condition-references object)))))
 
 
 ;;; Utility functions

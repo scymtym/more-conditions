@@ -22,7 +22,7 @@
   functions for custom simple conditions easier.
   See [[*Custom Simple Conditions]] below.
 
-  Finally, =more-conditions= provides a couple of specific
+  As a third aspect, =more-conditions= provides a couple of specific
   =program-error= s:
   + =program-error=
     + =missing-required-argument=
@@ -32,6 +32,11 @@
     + =initarg-error=
       + =missing-required-initarg=
       + =incompatible-initargs=
+
+  Finally, =more-conditions= supports embedding documentation
+  references in conditions via =condition-references= and the
+  =reference-condition= mixin. See [[*Embedding Documentation References
+  in Conditions]] below.
 
 * Condition Translation for Layered Systems
   Assume some complex backend whose primary entry point is a =emit
@@ -54,7 +59,7 @@
        (target    :initarg :target
                   :reader  target))
       (:report (lambda (condition stream)
-                 (format stream "Could not ~A node ~A to target ~A~/more-conditions::maybe-print-cause/"
+                 (format stream "Could not ~S node ~A to target ~A~/more-conditions::maybe-print-cause/"
                          (operation condition)
                          (node condition)
                          (target condition)
@@ -81,13 +86,13 @@
     =handler-bind= rather than =handler-case=. This way the client can
     still determine the location of the causing condition.
   + Avoid wrapping multiple =emit-error= s around each other in case
-    recursive =emit= calls.
+    of recursive =emit= calls.
 
   Now =(emit -1 :foo *standard-output*)= signals an =emit-error= which
   describes the failed operation and contains a detailed description
   of the actual problem as its =more-conditions:cause=:
   #+BEGIN_EXAMPLE
-  Could not FOO node -1 to target #<SLIME-OUTPUT-STREAM {1005DAF453}> Caused by:
+  Could not :FOO node -1 to target #<SLIME-OUTPUT-STREAM {1005DAF453}> Caused by:
   > Cannot :FOO for negative real node -1.
   #+END_EXAMPLE
 * Custom Simple Conditions
@@ -110,8 +115,51 @@
   #+END_SRC
   Now =(simple-frob-error :bar)= and =(simple-frob-error :bar "Fez
   ~S." :whoop)= both produce nice reports.
+* Embedding Documentation References in Conditions
+  It is sometimes useful to include pointers to documentation in
+  signaled conditions. =more-conditions= supports this via the generic
+  function =condition-references= and the mixin class
+  =reference-condition=. =condition-references= returns a list of
+  references of the form =(DOCUMENT PART [LINK])=. The type
+  =reference-spec= and the readers =reference-document=,
+  =reference-part=, =reference-link= deal with these
+  references. =reference-condition= stores a list of such references
+  and =condition-references= collects all references traversing
+  =cause= relations.
 
-* settings							   :noexport:
+  For example, the following condition
+  #+BEGIN_SRC lisp
+  (define-condition foo-error (error
+			       more-conditions:reference-condition
+			       more-conditions:chainable-condition)
+    ()
+    (:report (lambda (condition stream)
+	       ;; Prevent reference printing in causing condition(s)
+	       (let ((more-conditions:*print-references* nil)) 
+		 (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
+			 condition)))))
+
+  (error 'foo-error
+	 :cause      (make-condition 'foo-error
+				     :references '((:foo "bar")
+						   (:foo "baz")
+						   (:bar "fez" "http://whoop.org")))
+	 :references '((:foo "bar")
+                       (:fez "whiz")))
+  #+END_SRC
+  would print the following report:
+  #+BEGIN_EXAMPLE
+  Foo Error. Caused by:
+  > Reference Error.
+  See also:
+    FOO, bar
+    FOO, baz
+    BAR, fez <http://whoop.org>
+    FEZ, whiz
+  #+END_EXAMPLE
+  Note how references from the causing condition are collected and
+  printed.
+* settings                                                         :noexport:
 
 # Local Variables:
 # mode: org

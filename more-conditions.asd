@@ -22,7 +22,7 @@
 (defparameter +version-major+ 0
   "Major component of version number.")
 
-(defparameter +version-minor+ 1
+(defparameter +version-minor+ 2
   "Minor component of version number.")
 
 (defparameter +version-revision+ 0
@@ -56,6 +56,8 @@ boundaries in larger systems."
   :components  ((:module     "src"
 		 :serial     t
 		 :components ((:file       "package")
+			      (:file       "types")
+			      (:file       "variables")
 			      (:file       "conditions")
 			      (:file       "macros"))))
 

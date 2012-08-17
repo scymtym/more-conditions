@@ -9,6 +9,20 @@
    #:cl
    #:alexandria)
 
+  ;; Types
+  (:export
+   #:reference-spec
+
+   #:reference-document
+   #:reference-part
+   #:reference-link
+
+   #:print-reference)
+
+  ;; Variables
+  (:export
+   #:*print-references*)
+
   ;; Conditions
   (:export
    ;; simple condition utilities
@@ -37,7 +51,11 @@
    #:missing-required-initarg            ; condition and function
 
    #:incompatible-initargs               ; condition and function
-   )
+
+   ;; references
+   #:condition-references
+
+   #:reference-condition)
 
   ;; Macros
   (:export
@@ -54,10 +72,12 @@ Conditions
   * `missing-required-initarg'
 * `incompatible-arguments'
   * `incompatible-initargs'
+* `reference-condition'
 
 Condition helper functions
 * `maybe-print-cause'
 * `maybe-print-explanation'
+* `print-reference'
 
 Macros
 * `with-condition-translation'

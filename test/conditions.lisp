@@ -172,3 +172,57 @@ is invalid for class :FOO.")
   :BAZBAZ 2
 
 is invalid for class :FOO."))
+
+
+;;; `reference-condition'
+;;
+
+(define-condition reference-error (error reference-condition)
+  ()
+  (:report "Reference Error."))
+
+(define-condition-suite (reference-error)
+  '((:references ())
+    ()
+    "Reference Error.")
+
+  '((:references ((:foo "bar")))
+    ()
+    "Reference Error.
+See also:
+  FOO, bar")
+
+  '((:references ((:foo "bar")
+		  (:foo ("bar" "baz"))
+		  (:foo ("bar" "baz") "http://fez.org")))
+    ()
+    "Reference Error.
+See also:
+  FOO, bar
+  FOO, bar » baz
+  FOO, bar » baz <http://fez.org>"))
+
+(define-condition foo-error (error
+			     reference-condition
+			     chainable-condition)
+  ()
+  (:report (lambda (condition stream)
+	     (let ((*print-references* nil))
+	       (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
+		       condition)))))
+
+(define-condition-suite (foo-error)
+  `((:references ((:foo "bar")
+		  (:fez "whiz"))
+     :cause      ,(make-condition 'reference-error
+				  :references '((:foo "bar")
+						(:foo "baz")
+						(:bar "fez" "http://whoop.org"))))
+    ()
+    "Foo Error. Caused by:
+> Reference Error.
+See also:
+  FOO, bar
+  FOO, baz
+  BAR, fez <http://whoop.org>
+  FEZ, whiz"))
