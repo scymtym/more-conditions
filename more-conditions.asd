@@ -65,7 +65,8 @@ conjunction with support functions and macros."
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "conditions")
-			      (:file       "macros"))))
+			      (:file       "macros")
+			      (:file       "compilation"))))
 
   :in-order-to ((test-op (test-op :more-conditions-test))))
 
@@ -81,7 +82,8 @@ conjunction with support functions and macros."
 		 :serial     t
 		 :components ((:file       "package")
 			      (:file       "conditions")
-			      (:file       "macros")))))
+			      (:file       "macros")
+			      (:file       "compilation")))))
 
 (defmethod perform ((op        test-op)
 		    (component (eql (find-system :more-conditions-test))))
