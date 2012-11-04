@@ -17,21 +17,21 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:defpackage :more-conditions.test
+(cl:defpackage #:more-conditions.test
   (:use
-   :cl
-   :alexandria
-   :lift
+   #:cl
+   #:alexandria
+   #:lift
 
-   :more-conditions)
+   #:more-conditions)
 
   (:export
-   :root)
+   #:root)
 
   (:documentation
    "This package contains unit tests for the more-conditions system"))
 
-(cl:in-package :more-conditions.test)
+(cl:in-package #:more-conditions.test)
 
 (deftestsuite root ()
   ()

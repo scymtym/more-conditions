@@ -17,7 +17,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:in-package :more-conditions)
+(cl:in-package #:more-conditions)
 
 (defmacro with-condition-translation (clauses &body body)
   "Execute BODY translating conditions as specified by CLAUSES when

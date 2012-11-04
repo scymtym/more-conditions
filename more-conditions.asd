@@ -17,16 +17,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses>.
 
-(cl:defpackage :more-conditions-system
+(cl:defpackage #:more-conditions-system
   (:use
-   :cl
-   :asdf)
+   #:cl
+   #:asdf)
 
   (:export
-   :version/list
-   :version/string))
+   #:version/list
+   #:version/string))
 
-(cl:in-package :more-conditions-system)
+(cl:in-package #:more-conditions-system)
 
 
 ;;; Version stuff
