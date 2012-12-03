@@ -32,13 +32,13 @@
 ;;; Version stuff
 ;;
 
-(defconstant +version-major+ 0
+(defparameter +version-major+ 0
   "Major component of version number.")
 
-(defconstant +version-minor+ 1
+(defparameter +version-minor+ 1
   "Minor component of version number.")
 
-(defconstant +version-revision+ 0
+(defparameter +version-revision+ 0
   "Revision component of version number.")
 
 (defun version/list ()
@@ -75,7 +75,7 @@ conjunction with support functions and macros."
   :version     #.(version/string)
   :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the more-conditions system."
-  :depends-on  ((:version :more-conditions #. (version/string))
+  :depends-on  ((:version :more-conditions #.(version/string))
 		(:version :lift            "1.7.1"))
   :components  ((:module     "test"
 		 :serial     t
