@@ -60,6 +60,11 @@
   :license     "LLGPLv3; see COPYING file for details."
   :description "This system provides some generic condition classes in
 conjunction with support functions and macros."
+  :long-description "The idea is similar to
+`alexandria:required-argument' but more fine-grained.
+
+In addition, there is support for translating condition at layer
+boundaries in larger systems."
   :depends-on  (:alexandria)
   :components  ((:module     "src"
 		 :serial     t
