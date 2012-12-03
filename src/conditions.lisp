@@ -220,6 +220,6 @@ onto STREAM. AT? and COLON? are ignored."
 	   (reduce #'max parameters
 		   :key           (compose #'length #'prin1-to-string)
 		   :initial-value 0)))
-      (format stream "~:{~,,1<~%~2@T~VS~@;~A~>~}"
+      (format stream "~:{~,,1<~%~2@T~VS~@;~S~>~}"
 	      (mapcar #'list
 		      (circular-list max-name-length) parameters values)))))
