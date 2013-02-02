@@ -88,7 +88,7 @@ logical block."
 (define-condition missing-required-argument (program-error)
   ((parameter :initarg  :parameter
 	      :type     symbol
-	      :accessor missing-required-argument-parameter
+	      :reader   missing-required-argument-parameter
 	      :documentation
 	      "The parameter for which a value should have been
 supplied."))
@@ -109,13 +109,13 @@ parameter."))
 (define-condition incompatible-arguments (program-error)
   ((parameters :initarg  :parameters
 	       :type     list
-	       :accessor incompatible-arguments-parameters
+	       :reader   incompatible-arguments-parameters
 	       :documentation
 	       "A list of the parameters for which incompatible values
 have been supplied.")
    (values     :initarg  :values
 	       :type     list
-	       :accessor incompatible-arguments-values
+	       :reader   incompatible-arguments-values
 	       :documentation
 	       "A list of the incompatible values."))
   (:report
@@ -149,7 +149,7 @@ be of the form
 (define-condition initarg-error (program-error)
   ((class :initarg  :class
 	  :type     symbol
-	  :accessor initarg-error-class
+	  :reader   initarg-error-class
 	  :documentation
 	  "The class for which the initarg error occurred."))
   (:report
