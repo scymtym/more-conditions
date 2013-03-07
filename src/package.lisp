@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -60,7 +60,9 @@
   ;; Macros
   (:export
    #:with-condition-translation
-   #:define-condition-translating-method)
+   #:define-condition-translating-method
+
+   #:error-behavior-restart-case)
 
   (:documentation
    "This package provides generic conditions and condition-related
@@ -81,4 +83,6 @@ Condition helper functions
 
 Macros
 * `with-condition-translation'
-* `define-condition-translating-method'"))
+* `define-condition-translating-method'
+
+* `error-behavior-restart-cases'"))

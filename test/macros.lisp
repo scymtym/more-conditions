@@ -107,3 +107,42 @@ which adds additional initargs via
 	(foo/initargs source)
       (target-condition/no-cause (condition)
 	(ensure-same (target-condition-slot condition) :supplied)))))
+
+;;; `error-behavior-restart-case'
+
+(deftestsuite error-behavior-restart-case-root (macros-root)
+  ()
+  (:documentation
+   "Unit tests for the `error-behavior-restart-case' macro."))
+
+(addtest (error-behavior-restart-case-root
+          :documentation
+	  "Smoke test for the `error-behavior-restart-case' macro.")
+  smoke
+
+  (ensure-cases (policy expected)
+
+      `((,#'error    error)
+	(error       error)
+	(,#'warn     nil)
+	(warn        nil)
+	(,#'continue :continue)
+	(continue    :continue)
+	(nil         nil)
+	(:foo        :foo)
+	(1           1))
+
+    (flet ((do-it ()
+	     (more-conditions:error-behavior-restart-case
+		 (policy
+		  (simple-error
+		   :format-control   "Example error: ~A"
+		   :format-arguments (list :foo))
+		  :warning-condition   simple-warning
+		  :allow-other-values? t)
+	       (continue (&optional condition)
+			 :continue))))
+
+      (case expected
+	(error (ensure-condition 'error (do-it)))
+	(t     (ensure-same (do-it) expected))))))

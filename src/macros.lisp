@@ -93,3 +93,61 @@ CLAUSES, see `with-condition-translation')."
 			    ,@(mapcar #'just-the-var keys)))
 	(with-condition-translation (,@clauses)
 	  (call-next-method))))))
+
+;;; Error behavior
+
+(defmacro error-behavior-restart-case ((var (error-condition
+					     &rest initargs
+					     &key &allow-other-keys)
+					&key
+					warning-condition
+					(allow-other-values? t))
+				       &body clauses)
+  "Select error/warning signaling of ERROR-CONDITION or
+WARNING-CONDITION according to VAR and establish restarts as specified
+in CLAUSES.
+
+CLAUSES use the same syntax as the restart clauses in
+`cl:restart-case'.
+
+INITARGS are passed to the constructed conditions.
+
+ALLOW-OTHER-VALUES? controls whether the form should evaluate to the
+value of VAR if it is not a function.
+
+Example:
+
+  (flet ((try-policy (policy)
+           (error-behavior-restart-case
+              (policy
+               (simple-error
+                :format-control   \"Example error: ~A\"
+                :format-arguments (list :foo))
+               :warning-condition   simple-warning
+               :allow-other-values? t)
+             (continue (&optional condition)
+              :continue))))
+    ;; (try-policy #'error) => Error: Example error: FOO
+    ;; (try-policy 'error) => Error: Example error: FOO
+    (mapcar #'try-policy (list warn #'warn continue #'continue 1 :foo nil)))
+  |  WARNING: Example error: FOO
+  |  WARNING: Example error: FOO
+  => (nil nil :continue :continue 1 :foo nil)
+"
+  (once-only (var)
+    `(,(if allow-other-values? 'typecase 'etypecase) ,var
+       ((or function (and symbol (not (or keyword null))))
+	(restart-case
+	    (funcall ,var
+		     ,(if warning-condition
+			  `(make-condition
+			    (cond
+			      ((member ,var `(warn ,#'warn))
+			       ',warning-condition)
+			      (t
+			       ',error-condition))
+			    ,@initargs)
+			  `(error ',error-condition ,@initargs)))
+	  ,@clauses))
+      ,@(when allow-other-values?
+	  `((t ,var))))))
