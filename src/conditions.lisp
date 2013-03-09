@@ -174,7 +174,7 @@ is not supplied."))
      (let ((parameters (incompatible-arguments-parameters condition))
 	   (values     (incompatible-arguments-values     condition)))
        (format stream "~@<~:[No initargs are~;~:*The combination of ~
-initargs~&~/more-conditions::print-arguments/~2&is~] invalid for class ~S.~@>"
+initargs~&~/more-conditions::print-arguments/~2&is~] invalid for class ~S.~:>"
 	      (when parameters (list parameters values))
 	      (initarg-error-class condition)))))
   (:documentation
