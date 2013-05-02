@@ -58,14 +58,14 @@ by resignaling via e.g. `cl:warn').  "
              (check-type signal-via     symbol)
 
              `((and ,from-condition (not ,to-condition))
-               #'(lambda (,var)
-                   ,@(unless (or var-supplied? cause-initarg muffle?)
-                       `((declare (ignore ,var))))
-                   (,signal-via ',to-condition
-                                ,@initargs
-                                ,@(when cause-initarg
-                                    `(,cause-initarg ,var)))
-                   ,@(when muffle?
+               (lambda (,var)
+                 ,@(unless (or var-supplied? cause-initarg muffle?)
+                     `((declare (ignore ,var))))
+                 (,signal-via ',to-condition
+                              ,@initargs
+                              ,@(when cause-initarg
+                                  `(,cause-initarg ,var)))
+                 ,@(when muffle?
                      `((muffle-warning ,var))))))))
 
     (multiple-value-bind (body declarations)
