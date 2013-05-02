@@ -79,7 +79,7 @@ supplied."))
   (:report
    (lambda (condition stream)
      (format stream "~@<No value has been supplied for the required ~
-parameter ~S.~@:>"
+                     parameter ~S.~@:>"
              (missing-required-argument-parameter condition))))
   (:documentation
    "This error is signaled when no value is supplied for a required
@@ -107,7 +107,8 @@ have been supplied.")
      (let ((parameters (incompatible-arguments-parameters condition))
            (values     (incompatible-arguments-values     condition)))
       (format stream "~@<~:[No arguments are~;~:*The combination of ~
-arguments~&~/more-conditions::print-arguments/~2&is~] invalid.~:>"
+                      arguments~&~/more-conditions::print-arguments/~2&is~] ~
+                      invalid.~:>"
               (when parameters (list parameters values))))))
   (:documentation
    "This error is signaled when an incompatible combination of
@@ -137,7 +138,7 @@ be of the form
   (:report
    (lambda (condition stream)
      (format stream "~@<Invalid initargs have been supplied for class ~
-~S.~@:>"
+                     ~S.~@:>"
              (initarg-error-class condition))))
   (:documentation
    "This error is signaled when invalid initargs are supplied."))
@@ -148,7 +149,7 @@ be of the form
   (:report
    (lambda (condition stream)
      (format stream "~@<The initarg ~S is required by class ~S, but ~
-has not been supplied.~@:>"
+                     has not been supplied.~@:>"
              (missing-required-argument-parameter condition)
              (initarg-error-class                 condition))))
   (:documentation
@@ -169,7 +170,8 @@ is not supplied."))
      (let ((parameters (incompatible-arguments-parameters condition))
            (values     (incompatible-arguments-values     condition)))
        (format stream "~@<~:[No initargs are~;~:*The combination of ~
-initargs~&~/more-conditions::print-arguments/~2&is~] invalid for class ~S.~:>"
+                       initargs~&~/more-conditions::print-arguments/~2&is~] ~
+                       invalid for class ~S.~:>"
               (when parameters (list parameters values))
               (initarg-error-class condition)))))
   (:documentation
