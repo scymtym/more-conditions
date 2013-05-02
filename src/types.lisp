@@ -6,9 +6,7 @@
 
 (cl:in-package #:more-conditions)
 
-
 ;;; type `reference-spec'
-;;
 
 (deftype reference-spec ()
   "A documentation reference of the form
@@ -19,8 +17,8 @@ where DOCUMENT is a keyword, PART is a string or list of strings and
 LINK, if present, is a string."
   '(cons keyword                      ; document
          (cons (or string list)       ; part
-	       (cons (or null string) ; link
-		     null))))
+               (cons (or null string) ; link
+                     null))))
 
 (defun reference-document (spec)
   "Return the document of SPEC."

@@ -18,34 +18,34 @@ functions provided by the more-conditions system."))
    ;; Without eval, causes failed aver in SBCL.
    (eval
     `(define-condition foo-error (error
-				  chainable-condition)
+                                  chainable-condition)
        ()
        (:report
-	(lambda (condition stream)
-	  (format stream "Foo-error occurred.~/more-conditions::maybe-print-cause/"
-		  condition))))))
+        (lambda (condition stream)
+          (format stream "Foo-error occurred.~/more-conditions::maybe-print-cause/"
+                  condition))))))
   (:documentation
    "Test suite for the `maybe-print-cause' helper function."))
 
 (addtest (maybe-print-cause-root
           :documentation
-	  "Test printing condition instances using the
+          "Test printing condition instances using the
 `maybe-print-cause' helper function.")
   print
 
   (ensure-cases (initargs expected)
       `((nil
-	 "Foo-error occurred.")
-	((:cause ,(make-condition 'simple-error
-				  :format-control "The number was ~S."
-				  :format-arguments '(1)))
-	 "Foo-error occurred. Caused by:
+         "Foo-error occurred.")
+        ((:cause ,(make-condition 'simple-error
+                                  :format-control "The number was ~S."
+                                  :format-arguments '(1)))
+         "Foo-error occurred. Caused by:
 > The number was 1."))
 
     (ensure-same (princ-to-string
-		  (apply #'make-condition 'foo-error initargs))
-		 expected
-		 :test #'string=)))
+                  (apply #'make-condition 'foo-error initargs))
+                 expected
+                 :test #'string=)))
 
 (deftestsuite maybe-print-explanation-root (conditions-root)
   ()
@@ -55,68 +55,66 @@ functions provided by the more-conditions system."))
     `(define-condition simple-foo-error (simple-error)
        ()
        (:report
-	(lambda (condition stream)
-	  (format stream "Foo-error occurred~/more-conditions::maybe-print-explanation/"
-		  condition))))))
+        (lambda (condition stream)
+          (format stream "Foo-error occurred~/more-conditions::maybe-print-explanation/"
+                  condition))))))
   (:documentation
    "Test suite for the `maybe-print-explanation' helper function."))
 
 (addtest (maybe-print-explanation-root
           :documentation
-	  "Test printing condition instances using the
+          "Test printing condition instances using the
 `maybe-print-explanation' helper function.")
   print
 
   (ensure-cases (initargs expected)
       '((nil
-	 "Foo-error occurred.")
-	((:format-control   "the number was ~S."
-	  :format-arguments (1))
-	 "Foo-error occurred: the number was 1."))
+         "Foo-error occurred.")
+        ((:format-control   "the number was ~S."
+          :format-arguments (1))
+         "Foo-error occurred: the number was 1."))
 
     (ensure-same (princ-to-string
-		  (apply #'make-condition 'simple-foo-error initargs))
-		 expected
-		 :test #'string=)))
+                  (apply #'make-condition 'simple-foo-error initargs))
+                 expected
+                 :test #'string=)))
 
-
 ;;; Program error conditions
-;;
 
 (defmacro define-condition-suite ((name) &body cases)
   (let ((suite-name (format-symbol *package* "~A-ROOT" name)))
    `(progn
       (deftestsuite ,suite-name (conditions-root)
-	()
-	(:documentation
-	 ,(format nil "Unit tests for the `~(~A~)' condition class."
-		  name)))
+        ()
+        (:documentation
+         ,(format nil "Unit tests for the `~(~A~)' condition class."
+                  name)))
 
       (addtest (,suite-name
-		:documentation
-		,(format nil "Test printing instances of the `~(~A~)' condition class"
-			 name))
-	construct-and-print/make-condition
+                :documentation
+                ,(format nil "Test printing instances of the `~(~A~)' condition class"
+                         name))
+        construct-and-print/make-condition
 
-	(ensure-cases (initargs constructor-args expected) (list ,@cases)
-	  (ensure-same (princ-to-string (apply #'make-condition ',name initargs))
-		       expected
-		       :test #'string=)))
+        (ensure-cases (initargs constructor-args expected) (list ,@cases)
+          (ensure-same (princ-to-string (apply #'make-condition ',name initargs))
+                       expected
+                       :test #'string=)))
 
       ,@(when (fboundp name)
-	  `((addtest (,suite-name
-		      :documentation
-		      ,(format nil "Test printing instances of the `~(~A~)' condition class"
-			       name))
-	      construct-and-print/constructor
+          `((addtest (,suite-name
+                      :documentation
+                      ,(format nil "Test printing instances of the `~(~A~)' condition class"
+                               name))
+              construct-and-print/constructor
 
-	      (ensure-cases (initargs constructor-args expected) (list ,@cases)
-		(ensure-same (handler-case
-				 (apply #',name constructor-args)
-			       (error (condition)
-				 (princ-to-string condition)))
-			     expected
-			     :test #'string=))))))))
+              (ensure-cases (initargs constructor-args expected) (list ,@cases)
+                (ensure-same (handler-case
+                                 (apply #',name constructor-args)
+                               (error (condition)
+                                 (princ-to-string condition)))
+                             expected
+                             :test #'string=))))))))
 
 (define-condition-suite (missing-required-argument)
   '((:parameter :foo)
@@ -173,9 +171,7 @@ is invalid for class :FOO.")
 
 is invalid for class :FOO."))
 
-
 ;;; `reference-condition'
-;;
 
 (define-condition reference-error (error reference-condition)
   ()
@@ -193,8 +189,8 @@ See also:
   FOO, bar")
 
   '((:references ((:foo "bar")
-		  (:foo ("bar" "baz"))
-		  (:foo ("bar" "baz") "http://fez.org")))
+                  (:foo ("bar" "baz"))
+                  (:foo ("bar" "baz") "http://fez.org")))
     ()
     "Reference Error.
 See also:
@@ -203,21 +199,21 @@ See also:
   FOO, bar » baz <http://fez.org>"))
 
 (define-condition foo-error (error
-			     reference-condition
-			     chainable-condition)
+                             reference-condition
+                             chainable-condition)
   ()
   (:report (lambda (condition stream)
-	     (let ((*print-references* nil))
-	       (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
-		       condition)))))
+             (let ((*print-references* nil))
+               (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
+                       condition)))))
 
 (define-condition-suite (foo-error)
   `((:references ((:foo "bar")
-		  (:fez "whiz"))
+                  (:fez "whiz"))
      :cause      ,(make-condition 'reference-error
-				  :references '((:foo "bar")
-						(:foo "baz")
-						(:bar "fez" "http://whoop.org"))))
+                                  :references '((:foo "bar")
+                                                (:foo "baz")
+                                                (:bar "fez" "http://whoop.org"))))
     ()
     "Foo Error. Caused by:
 > Reference Error.

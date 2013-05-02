@@ -6,9 +6,7 @@
 
 (cl:in-package #:more-conditions)
 
-
 ;;; `*print-references*' special variable
-;;
 
 (declaim (special *print-references*))
 

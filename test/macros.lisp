@@ -13,16 +13,16 @@
    (eval
     `(progn
        (define-condition source-condition (error)
-	 ())
+         ())
        (define-condition target-condition/no-cause (error)
-	 ((slot :initarg  :slot
-		:reader   target-condition-slot
-		:initform :default)))
+         ((slot :initarg  :slot
+                :reader   target-condition-slot
+                :initform :default)))
        (define-condition target-condition/cause (error
-						 chainable-condition)
-	 ((slot :initarg  :slot
-		:reader   target-condition-slot
-		:initform :default))))))
+                                                 chainable-condition)
+         ((slot :initarg  :slot
+                :reader   target-condition-slot
+                :initform :default))))))
   (:documentation
    "Test suite for macros provided by the more-conditions
 system."))
@@ -33,32 +33,32 @@ system."))
    "Unit tests for `with-condition-translation' macro."))
 
 (addtest (with-condition-translation-root
-	  :documentation
-	  "Smoke test for translating `error' to a condition class
+          :documentation
+          "Smoke test for translating `error' to a condition class
 without cause storage via `with-condition-translation'.")
   smoke/no-cause
 
   (let ((source (make-condition 'source-condition)))
    (handler-case
        (with-condition-translation (((error target-condition/no-cause)))
-	 (error source))
+         (error source))
      (target-condition/no-cause (condition)
        (ensure-same (target-condition-slot condition) :default)))))
 
 (addtest (with-condition-translation-root
-	  :documentation
-	   "Smoke test for translating `error' to a condition class
+          :documentation
+           "Smoke test for translating `error' to a condition class
 with cause storage via `with-condition-translation'.")
   smoke/cause
 
   (let ((source (make-condition 'source-condition)))
     (handler-case
-	(with-condition-translation (((error target-condition/cause)))
-	  (error source))
+        (with-condition-translation (((error target-condition/cause)))
+          (error source))
       (target-condition/cause (condition)
-	(ensure-same (target-condition-slot condition) :default)
-	(ensure-same (cause                 condition) source)
-	(ensure-same (root-cause            condition) source)))))
+        (ensure-same (target-condition-slot condition) :default)
+        (ensure-same (cause                 condition) source)
+        (ensure-same (root-cause            condition) source)))))
 
 (deftestsuite define-condition-translating-method-root (macros-root)
   ()
@@ -81,32 +81,32 @@ with cause storage via `with-condition-translation'.")
    "Test suite for the `define-condition-translating-method' macro."))
 
 (addtest (define-condition-translating-method-root
-	  :documentation
-	  "Smoke test for defining a condition translating method with
+          :documentation
+          "Smoke test for defining a condition translating method with
 capturing of the causing condition via
 `define-condition-translating-method.'")
   smoke/cause
 
   (let ((source (make-condition 'source-condition)))
     (handler-case
-	(foo source)
+        (foo source)
       (target-condition/cause (condition)
-	(ensure-same (target-condition-slot condition) :default)
-	(ensure-same (cause                 condition) source)
-	(ensure-same (root-cause            condition) source)))))
+        (ensure-same (target-condition-slot condition) :default)
+        (ensure-same (cause                 condition) source)
+        (ensure-same (root-cause            condition) source)))))
 
 (addtest (define-condition-translating-method-root
-	  :documentation
-	     "Smoke test for defining a condition translating method
+          :documentation
+             "Smoke test for defining a condition translating method
 which adds additional initargs via
 `define-condition-translating-method.'")
   smoke/initargs
 
   (let ((source (make-condition 'source-condition)))
     (handler-case
-	(foo/initargs source)
+        (foo/initargs source)
       (target-condition/no-cause (condition)
-	(ensure-same (target-condition-slot condition) :supplied)))))
+        (ensure-same (target-condition-slot condition) :supplied)))))
 
 ;;; `error-behavior-restart-case'
 
@@ -117,32 +117,32 @@ which adds additional initargs via
 
 (addtest (error-behavior-restart-case-root
           :documentation
-	  "Smoke test for the `error-behavior-restart-case' macro.")
+          "Smoke test for the `error-behavior-restart-case' macro.")
   smoke
 
   (ensure-cases (policy expected)
 
       `((,#'error    error)
-	(error       error)
-	(,#'warn     nil)
-	(warn        nil)
-	(,#'continue :continue)
-	(continue    :continue)
-	(nil         nil)
-	(:foo        :foo)
-	(1           1))
+        (error       error)
+        (,#'warn     nil)
+        (warn        nil)
+        (,#'continue :continue)
+        (continue    :continue)
+        (nil         nil)
+        (:foo        :foo)
+        (1           1))
 
     (flet ((do-it ()
-	     (more-conditions:error-behavior-restart-case
-		 (policy
-		  (simple-error
-		   :format-control   "Example error: ~A"
-		   :format-arguments (list :foo))
-		  :warning-condition   simple-warning
-		  :allow-other-values? t)
-	       (continue (&optional condition)
-			 :continue))))
+             (more-conditions:error-behavior-restart-case
+                 (policy
+                  (simple-error
+                   :format-control   "Example error: ~A"
+                   :format-arguments (list :foo))
+                  :warning-condition   simple-warning
+                  :allow-other-values? t)
+               (continue (&optional condition)
+                         :continue))))
 
       (case expected
-	(error (ensure-condition 'error (do-it)))
-	(t     (ensure-same (do-it) expected))))))
+        (error (ensure-condition 'error (do-it)))
+        (t     (ensure-same (do-it) expected))))))

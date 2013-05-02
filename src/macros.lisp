@@ -41,39 +41,39 @@ after the translation has been performed. \(This is useful for
 `cl:warning's and generic `cl:condition's which would not get handled
 by resignaling via e.g. `cl:warn').  "
   (flet ((do-clause (clause)
-	   (destructuring-bind
-		 ((from-condition to-condition
-		   &key
-		   (var            (gensym) var-supplied?)
-		   (cause-initarg  :cause)
-		   (signal-via     'error)
-		   (muffle?        (subtypep from-condition 'warning)))
-		  &body initargs)
-	       clause
-	     (when var-supplied?
-	       (check-type var symbol))
-	     (check-type from-condition (or symbol cons))
-	     (check-type to-condition   symbol "the name of a condition class")
-	     (check-type cause-initarg  symbol)
-	     (check-type signal-via     symbol)
+           (destructuring-bind
+                 ((from-condition to-condition
+                   &key
+                   (var            (gensym) var-supplied?)
+                   (cause-initarg  :cause)
+                   (signal-via     'error)
+                   (muffle?        (subtypep from-condition 'warning)))
+                  &body initargs)
+               clause
+             (when var-supplied?
+               (check-type var symbol))
+             (check-type from-condition (or symbol cons))
+             (check-type to-condition   symbol "the name of a condition class")
+             (check-type cause-initarg  symbol)
+             (check-type signal-via     symbol)
 
-	     `((and ,from-condition (not ,to-condition))
-	       #'(lambda (,var)
-		   ,@(unless (or var-supplied? cause-initarg muffle?)
-		       `((declare (ignore ,var))))
-		   (,signal-via ',to-condition
-				,@initargs
-				,@(when cause-initarg
-				    `(,cause-initarg ,var)))
-		   ,@(when muffle?
-		     `((muffle-warning ,var))))))))
+             `((and ,from-condition (not ,to-condition))
+               #'(lambda (,var)
+                   ,@(unless (or var-supplied? cause-initarg muffle?)
+                       `((declare (ignore ,var))))
+                   (,signal-via ',to-condition
+                                ,@initargs
+                                ,@(when cause-initarg
+                                    `(,cause-initarg ,var)))
+                   ,@(when muffle?
+                     `((muffle-warning ,var))))))))
 
     (multiple-value-bind (body declarations)
-	(parse-body body)
+        (parse-body body)
       `(handler-bind (,@(mapcar #'do-clause clauses))
-	 (locally
-	     ,@declarations
-	   ,@body)))))
+         (locally
+             ,@declarations
+           ,@body)))))
 
 (defmacro define-condition-translating-method
     (name (&rest args) &body clauses)
@@ -84,25 +84,25 @@ CLAUSES, see `with-condition-translation')."
       (parse-ordinary-lambda-list args :allow-specializers t)
     (declare (ignore required other? aux))
     (flet ((just-the-var (arg-spec)
-	     (destructuring-bind (name &optional (var name))
-		 (ensure-list (first arg-spec))
-	       var)))
+             (destructuring-bind (name &optional (var name))
+                 (ensure-list (first arg-spec))
+               var)))
      `(defmethod ,name :around (,@args)
         (declare (ignorable ,@(ensure-list rest)
-			    ,@(mapcar #'just-the-var optional)
-			    ,@(mapcar #'just-the-var keys)))
-	(with-condition-translation (,@clauses)
-	  (call-next-method))))))
+                            ,@(mapcar #'just-the-var optional)
+                            ,@(mapcar #'just-the-var keys)))
+        (with-condition-translation (,@clauses)
+          (call-next-method))))))
 
 ;;; Error behavior
 
 (defmacro error-behavior-restart-case ((var (error-condition
-					     &rest initargs
-					     &key &allow-other-keys)
-					&key
-					warning-condition
-					(allow-other-values? t))
-				       &body clauses)
+                                             &rest initargs
+                                             &key &allow-other-keys)
+                                        &key
+                                        warning-condition
+                                        (allow-other-values? t))
+                                       &body clauses)
   "Select error/warning signaling of ERROR-CONDITION or
 WARNING-CONDITION according to VAR and establish restarts as specified
 in CLAUSES.
@@ -137,17 +137,17 @@ Example:
   (once-only (var)
     `(,(if allow-other-values? 'typecase 'etypecase) ,var
        ((or function (and symbol (not (or keyword null))))
-	(restart-case
-	    (funcall ,var
-		     ,(if warning-condition
-			  `(make-condition
-			    (cond
-			      ((member ,var `(warn ,#'warn))
-			       ',warning-condition)
-			      (t
-			       ',error-condition))
-			    ,@initargs)
-			  `(error ',error-condition ,@initargs)))
-	  ,@clauses))
+        (restart-case
+            (funcall ,var
+                     ,(if warning-condition
+                          `(make-condition
+                            (cond
+                              ((member ,var `(warn ,#'warn))
+                               ',warning-condition)
+                              (t
+                               ',error-condition))
+                            ,@initargs)
+                          `(error ',error-condition ,@initargs)))
+          ,@clauses))
       ,@(when allow-other-values?
-	  `((t ,var))))))
+          `((t ,var))))))

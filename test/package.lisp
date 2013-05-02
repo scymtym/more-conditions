@@ -16,7 +16,8 @@
    #:root)
 
   (:documentation
-   "This package contains unit tests for the more-conditions system"))
+   "This package contains unit tests for the more-conditions
+system."))
 
 (cl:in-package #:more-conditions.test)
 
