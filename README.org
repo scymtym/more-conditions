@@ -59,7 +59,7 @@
       (target    :initarg :target
                  :reader  target))
      (:report (lambda (condition stream)
-                (format stream "Could not ~S node ~A to target ~A~/more-conditions::maybe-print-cause/"
+                (format stream "Could not ~S node ~A to target ~A~/more-conditions:maybe-print-cause/"
                         (operation condition)
                         (node condition)
                         (target condition)
@@ -165,7 +165,7 @@
       ((foo :initarg :foo
             :reader  foo))
       (:report (lambda (condition stream)
-                 (format stream "Could not frob ~S~/more-conditions::maybe-print-explanation/"
+                 (format stream "Could not frob ~S~/more-conditions:maybe-print-explanation/"
                          (foo condition)
                          condition))))
 
@@ -198,7 +198,7 @@
     (:report (lambda (condition stream)
                ;; Prevent reference printing in causing condition(s)
                (let ((more-conditions:*print-references* nil))
-                 (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
+                 (format stream "Foo Error.~/more-conditions:maybe-print-cause/"
                          condition)))))
 
   (error 'foo-error

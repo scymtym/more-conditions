@@ -22,7 +22,7 @@ functions provided by the more-conditions system."))
        ()
        (:report
         (lambda (condition stream)
-          (format stream "Foo-error occurred.~/more-conditions::maybe-print-cause/"
+          (format stream "Foo-error occurred.~/more-conditions:maybe-print-cause/"
                   condition))))))
   (:documentation
    "Test suite for the `maybe-print-cause' helper function."))
@@ -56,7 +56,7 @@ functions provided by the more-conditions system."))
        ()
        (:report
         (lambda (condition stream)
-          (format stream "Foo-error occurred~/more-conditions::maybe-print-explanation/"
+          (format stream "Foo-error occurred~/more-conditions:maybe-print-explanation/"
                   condition))))))
   (:documentation
    "Test suite for the `maybe-print-explanation' helper function."))
@@ -204,7 +204,7 @@ See also:
   ()
   (:report (lambda (condition stream)
              (let ((*print-references* nil))
-               (format stream "Mock Error.~/more-conditions::maybe-print-cause/"
+               (format stream "Mock Error.~/more-conditions:maybe-print-cause/"
                        condition)))))
 
 (define-condition-suite (mock-error/reference-condition)

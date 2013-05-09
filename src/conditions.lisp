@@ -107,7 +107,7 @@ have been supplied.")
      (let ((parameters (incompatible-arguments-parameters condition))
            (values     (incompatible-arguments-values     condition)))
       (format stream "~@<~:[No arguments are~;~:*The combination of ~
-                      arguments~&~/more-conditions::print-arguments/~2&is~] ~
+                      arguments~&~/more-conditions:print-arguments/~2&is~] ~
                       invalid.~:>"
               (when parameters (list parameters values))))))
   (:documentation
@@ -170,7 +170,7 @@ is not supplied."))
      (let ((parameters (incompatible-arguments-parameters condition))
            (values     (incompatible-arguments-values     condition)))
        (format stream "~@<~:[No initargs are~;~:*The combination of ~
-                       initargs~&~/more-conditions::print-arguments/~2&is~] ~
+                       initargs~&~/more-conditions:print-arguments/~2&is~] ~
                        invalid for class ~S.~:>"
               (when parameters (list parameters values))
               (initarg-error-class condition)))))
@@ -240,7 +240,7 @@ instances."))
              *print-references*
              (condition-references object))
     (format stream "~&See also:~%~<  ~@;~
-                    ~{~/more-conditions::print-reference/~^~%~}~:>"
+                    ~{~/more-conditions:print-reference/~^~%~}~:>"
             (list (condition-references object)))))
 
 ;;; Utility functions
