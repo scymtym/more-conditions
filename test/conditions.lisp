@@ -198,16 +198,16 @@ See also:
   FOO, bar » baz
   FOO, bar » baz <http://fez.org>"))
 
-(define-condition foo-error (error
-                             reference-condition
-                             chainable-condition)
+(define-condition mock-error/reference-condition (error
+                                                  reference-condition
+                                                  chainable-condition)
   ()
   (:report (lambda (condition stream)
              (let ((*print-references* nil))
-               (format stream "Foo Error.~/more-conditions::maybe-print-cause/"
+               (format stream "Mock Error.~/more-conditions::maybe-print-cause/"
                        condition)))))
 
-(define-condition-suite (foo-error)
+(define-condition-suite (mock-error/reference-condition)
   `((:references ((:foo "bar")
                   (:fez "whiz"))
      :cause      ,(make-condition 'reference-error
@@ -215,7 +215,7 @@ See also:
                                                 (:foo "baz")
                                                 (:bar "fez" "http://whoop.org"))))
     ()
-    "Foo Error. Caused by:
+    "Mock Error. Caused by:
 > Reference Error.
 See also:
   FOO, bar
