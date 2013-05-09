@@ -139,15 +139,20 @@ Example:
        ((or function (and symbol (not (or keyword null))))
         (restart-case
             (funcall ,var
-                     ,(if warning-condition
-                          `(make-condition
-                            (cond
-                              ((member ,var `(warn ,#'warn))
-                               ',warning-condition)
-                              (t
-                               ',error-condition))
-                            ,@initargs)
-                          `(error ',error-condition ,@initargs)))
+                     (make-condition
+                      (cond
+                        ((member ,var `(warn ,#'warn))
+                         ,(if warning-condition
+                              `',warning-condition
+                              `(error
+                                'simple-program-error
+                                :format-control "~@<Requested behavior ~
+                                                   ~S is not ~
+                                                   allowed.~@:>"
+                                :format-arguments `(,,var))))
+                        (t
+                         ',error-condition))
+                      ,@initargs))
           ,@clauses))
       ,@(when allow-other-values?
           `((t ,var))))))

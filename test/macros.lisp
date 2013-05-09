@@ -132,17 +132,28 @@ which adds additional initargs via
         (:foo        :foo)
         (1           1))
 
-    (flet ((do-it ()
-             (more-conditions:error-behavior-restart-case
-                 (policy
-                  (simple-error
-                   :format-control   "Example error: ~A"
-                   :format-arguments (list :foo))
-                  :warning-condition   simple-warning
-                  :allow-other-values? t)
-               (continue (&optional condition)
+    (flet ((do-it (warning?)
+             (macrolet
+                 ((body (warning?)
+                    `(error-behavior-restart-case
+                         (policy
+                          (simple-error
+                           :format-control   "Example error: ~A"
+                           :format-arguments (list :foo))
+                          ,@(when warning?
+                              '(:warning-condition simple-warning))
+                          :allow-other-values? t)
+                       (continue (&optional condition)
                          :continue))))
+               (if warning? (body t) (body nil)))))
 
       (case expected
-        (error (ensure-condition 'error (do-it)))
-        (t     (ensure-same (do-it) expected))))))
+        (error (ensure-condition 'error (do-it t)))
+        (t     (ensure-same (do-it t) expected)))
+      (case expected
+        (error (ensure-condition 'error (do-it nil)))
+        (t     (cond
+                 ((member policy `(warn ,#'warn))
+                  (ensure-condition 'program-error (do-it nil)))
+                 (t
+                  (ensure-same (do-it nil) expected))))))))
