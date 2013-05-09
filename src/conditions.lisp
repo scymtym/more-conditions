@@ -53,19 +53,27 @@ onto STREAM."
   "Format the message contained in the `simple-condition' CONDITION on
 STREAM.
 
-When COLON? is non-nil, the explanation is printed in an indented
-logical block."
-  (declare (ignore at?))
+If CONDITION does not have a message, print \".\". This is intended
+for messages which can be either
 
-  (if (simple-condition-format-control condition)
-      (progn
-        (format stream ": ~_")
-        (pprint-logical-block (stream nil :per-line-prefix (if colon?
-                                                               "  " ""))
-          (apply #'format stream
-                 (simple-condition-format-control   condition)
-                 (simple-condition-format-arguments condition))))
-      (write-char #\. stream)))
+     \"MESSAGE.\"
+  or \"MESSAGE: EXPLANATION\".
+
+When COLON? is non-nil, the explanation is printed in an indented
+logical block.
+
+When AT? is non-nil and CONDITION does not have an explanation,
+suppress printing \".\"."
+  (cond
+    ((simple-condition-format-control condition)
+     (format stream ": ~_")
+     (pprint-logical-block (stream nil :per-line-prefix (if colon?
+                                                            "  " ""))
+       (apply #'format stream
+              (simple-condition-format-control   condition)
+              (simple-condition-format-arguments condition))))
+    ((not at?)
+     (write-char #\. stream))))
 
 ;;; Program error conditions
 
