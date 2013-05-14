@@ -55,14 +55,27 @@
    ;; references
    #:condition-references
 
-   #:reference-condition)
+   #:reference-condition
+
+   ;; progress conditions
+   #:progress-condition
+   #:progress-condition-operation
+   #:progress-condition-progress
+   #:progress-condition-message
+
+   #:simple-progress-condition
+
+   #:progress)
 
   ;; Macros
   (:export
    #:with-condition-translation
    #:define-condition-translating-method
 
-   #:error-behavior-restart-case)
+   #:error-behavior-restart-case
+
+   #:with-trivial-progress
+   #:with-sequence-progress)
 
   (:documentation
    "This package provides generic conditions and condition-related
@@ -75,6 +88,8 @@ Conditions
 * `incompatible-arguments'
   * `incompatible-initargs'
 * `reference-condition'
+* `progress-condition'
+  * `simple-progress-condition'
 
 Condition helper functions
 * `maybe-print-cause'
@@ -85,4 +100,7 @@ Macros
 * `with-condition-translation'
 * `define-condition-translating-method'
 
-* `error-behavior-restart-cases'"))
+* `error-behavior-restart-cases'
+
+* `with-trivial-progress'
+* `with-sequence-progress'"))

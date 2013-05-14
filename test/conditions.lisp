@@ -81,7 +81,8 @@ functions provided by the more-conditions system."))
 
 ;;; Program error conditions
 
-(defmacro define-condition-suite ((name) &body cases)
+(defmacro define-condition-suite ((name &key (constructor name))
+                                  &body cases)
   (let ((suite-name (format-symbol *package* "~A-ROOT" name)))
    `(progn
       (deftestsuite ,suite-name (conditions-root)
@@ -101,7 +102,7 @@ functions provided by the more-conditions system."))
                        expected
                        :test #'string=)))
 
-      ,@(when (fboundp name)
+      ,@(when (fboundp constructor)
           `((addtest (,suite-name
                       :documentation
                       ,(format nil "Test printing instances of the `~(~A~)' condition class"
@@ -110,8 +111,8 @@ functions provided by the more-conditions system."))
 
               (ensure-cases (initargs constructor-args expected) (list ,@cases)
                 (ensure-same (handler-case
-                                 (apply #',name constructor-args)
-                               (error (condition)
+                                 (apply #',constructor constructor-args)
+                               (,name (condition)
                                  (princ-to-string condition)))
                              expected
                              :test #'string=))))))))
@@ -222,3 +223,42 @@ See also:
   FOO, baz
   BAR, fez <http://whoop.org>
   FEZ, whiz"))
+
+;;; Progress conditions
+
+(define-condition-suite (progress-condition :constructor progress)
+  `(()
+    ()
+    "???.?? %")
+  `((:operation :foo)
+    (:foo)
+    "FOO: ???.?? %")
+  `((:operation :foo :progress nil)
+    (:foo nil)
+    "FOO: ???.?? %")
+  `((:operation :foo :progress 0)
+    (:foo 0)
+    "FOO:   0.00 %")
+  `((:operation :foo :progress 1)
+    (:foo 1)
+    "FOO: 100.00 %")
+  `((:operation :foo :progress t)
+    (:foo t)
+    "FOO: 100.00 %")
+  `((:operation :foo :progress .51234)
+    (:foo .51234 progress-condition)
+    "FOO:  51.23 %"))
+
+(define-condition-suite (simple-progress-condition :constructor progress)
+  `((:operation :foo :progress .51234)
+    (:foo .51234 simple-progress-condition)
+    "FOO:  51.23 %")
+  `((:operation :foo :progress .51234 :format-control "bar")
+    (:foo .51234 "bar")
+    "FOO:  51.23 %: bar")
+  `((:operation        :foo
+     :progress         .51234
+     :format-control   "bar: ~A"
+     :format-arguments (:baz))
+    (:foo .51234 "bar: ~A" :baz)
+    "FOO:  51.23 %: bar: BAZ"))

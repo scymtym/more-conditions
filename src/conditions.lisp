@@ -251,6 +251,102 @@ instances."))
                     ~{~/more-conditions:print-reference/~^~%~}~:>"
             (list (condition-references object)))))
 
+;;; Progress conditions
+
+(defgeneric progress-condition-message (condition)
+  (:documentation
+   "Return a string describing CONDITION or NULL"))
+
+(defmethod progress-condition-message ((condition condition))
+  nil)
+
+(define-condition progress-condition (condition)
+  ((operation :initarg  :operation
+              :type     symbol
+              :reader   progress-condition-operation
+              :initform nil
+              :documentation
+              "Stores a symbol identifying the operation for which the
+condition reports progress.")
+   (progress  :initarg  :progress
+              :type     (or nil t (real 0 1))
+              :accessor progress-condition-progress
+              :initform nil
+              :documentation
+              "Stores the operation progress indicated by the
+condition. The following forms are allowed:
+
+nil
+
+  Progress is not known
+
+t
+
+  Task has been completed.
+
+real
+
+  Completion percentage as a real number between 0 (no progress) and
+  1 (completed; note that t should be used in this case, at least in a
+  subsequently signaled condition)."))
+  (:documentation
+   "This condition is signaled to indicate the progress of execution
+of an operation during the execution of that operation
+
+Note that this condition does not have to be handled and its signaling
+usually does not lead to a transfer of control."))
+
+(defmethod print-object ((object progress-condition) stream)
+  (flet ((do-it ()
+           (format stream "~@<~@[~A: ~
+                           ~]~/more-conditions:print-progress-percentage/~:>"
+                   (progress-condition-operation object)
+                   (progress-condition-progress object))))
+    (if *print-escape*
+        (print-unreadable-object (object stream :type t :identity t)
+          (do-it))
+        (do-it))))
+
+(define-condition simple-progress-condition (progress-condition
+                                             simple-condition)
+  ()
+  (:documentation
+   "Like `progress-condition' but supports format control and format
+arguments to produce a report to go along with the raw progress
+information."))
+
+(defmethod progress-condition-message ((condition simple-progress-condition))
+  (apply #'format nil
+         (simple-condition-format-control condition)
+         (simple-condition-format-arguments condition)))
+
+(defmethod print-object ((object simple-progress-condition) stream)
+  (call-next-method)
+  (unless *print-escape*
+    (maybe-print-explanation stream object nil t)))
+
+(defun progress (&optional operation progress
+                 format-control-or-condition-class
+                 &rest format-arguments-or-initargs)
+  "Signal a progress condition indicating completion status PROGRESS
+for OPERATION.
+
+As with `cl:signal', `cl:error' and `cl:warn',
+FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+either specify a condition class and initargs or a report report
+format control string and format arguments."
+  (if (stringp format-control-or-condition-class)
+      (signal 'simple-progress-condition
+              :operation        operation
+              :progress         progress
+              :format-control   format-control-or-condition-class
+              :format-arguments format-arguments-or-initargs)
+      (apply #'signal (or format-control-or-condition-class
+                          'progress-condition)
+             :operation operation
+             :progress  progress
+             format-arguments-or-initargs)))
+
 ;;; Utility functions
 
 (defun print-arguments (stream parameters-and-values &optional at? colon?)
@@ -268,3 +364,11 @@ onto STREAM. AT? and COLON? are ignored."
       (format stream "~:{~,,1<~%~2@T~VS~@;~S~>~}"
               (mapcar #'list
                       (circular-list max-name-length) parameters values)))))
+
+(defun print-progress-percentage (stream progress &optional colon? at?)
+  (declare (ignore colon? at?))
+  (format stream "~:[???.??~;~:*~6,2,2F~] %"
+          (case progress
+            ((nil) nil)
+            ((t)   1)
+            (t     progress))))

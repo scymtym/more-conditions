@@ -32,6 +32,10 @@
       + =missing-required-initarg=
       + =incompatible-initargs=
 
+  Furthermore, =more-conditions= contains conditions for reporting
+  progress of operations up the callstack in a minimally invasive
+  way. See [[*Tracking and Reporting Progress of Operations]].
+
   Finally, =more-conditions= supports embedding documentation
   references in conditions via =condition-references= and the
   =reference-condition= mixin. See [[*Embedding Documentation References
@@ -177,6 +181,67 @@
   #+END_SRC
   Now =(simple-frob-error :bar)= and =(simple-frob-error :bar "Fez
   ~S." :whoop)= both produce nice reports.
+* Tracking and Reporting Progress of Operations
+  Despite the most frequently used condition superclasses, =cl:error=
+  and =cl:warning=, the Common Lisp condition system allows arbitrary
+  other subclasses of =cl:condition= which are not a-priori associated
+  with certain control transfer behavior. The =more-conditions= system
+  exploits this for providing a family of conditions which indicate
+  progress of operations without necessarily affecting flow of control
+  or program execution in general.
+
+  The =more-conditions= system does not address the question of
+  /handling/ progress conditions (But see
+  [[http://github.com/scymtym/user-interface.progress][=user-interface.progress=]]). This is intended to allow "speculative"
+  signaling of progress conditions from as many operations as possible
+  without introducing dependencies beyond =more-conditions= into the
+  signaling system. Further, signaling code does not have to care or
+  even know whether the signaled progress conditions are actually
+  handled or not in a particular situation since program execution
+  remains unaffected.
+
+  In the =more-conditions= system, there are two builtin progress
+  condition classes: =more-conditions:progress-condition= and
+  =more-conditions:simple-progress-condition=. Support for signaling
+  these conditions is provided in form of the function
+  =more-conditions:progress= and the macros
+  =more-conditions:with-trivial-progress= and
+  =more-conditions:with-sequence-progress=.
+
+  These can be used as follows (the outer =cl:handler-bind= is
+  required for the signaled progress conditions to produce an
+  observable effect):
+  #+BEGIN_SRC lisp
+  (handler-bind ((more-conditions:progress-condition #'princ))
+    (more-conditions:progress :my-operation 0 "Preparing")
+    (sleep 1)
+    (more-conditions:progress :my-operation 1/3 "Processing ~A" :data)
+    (sleep 1)
+    (more-conditions:progress :my-operation 2/3 "Cleaning up")
+    (sleep 1)
+    (more-conditions:progress :my-operation t))
+  #+END_SRC
+
+  The =more-conditions:with-trivial-progress= can be used to indicate
+  execution of long running operations without reporting detailed
+  progress during execution:
+  #+BEGIN_SRC lisp
+  (handler-bind ((more-conditions:progress-condition #'princ))
+    (more-conditions:with-trivial-progress (:factorial "Computing factorial of ~D" 1000)
+      (alexandria:factorial 1000)))
+  #+END_SRC
+
+  For the common case of processing data sequentially, the
+  =more-conditions:with-sequence-progress= macro can be used to
+  easily signal progress conditions:
+  #+BEGIN_SRC lisp
+  (handler-bind ((more-conditions:progress-condition #'princ))
+    (let ((items (alexandria:iota 5)))
+      (more-conditions:with-sequence-progress (:frob items)
+        (dolist (item items)
+          (more-conditions:progress "Processing element ~A" item)
+          (sleep 1)))))
+  #+END_SRC
 * Embedding Documentation References in Conditions
   It is sometimes useful to include pointers to documentation in
   signaled conditions. =more-conditions= supports this via the generic
@@ -221,6 +286,7 @@
   #+END_EXAMPLE
   Note how references from the causing condition are collected and
   printed.
+
 * settings                                                         :noexport:
 
 # Local Variables:

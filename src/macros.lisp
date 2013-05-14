@@ -156,3 +156,64 @@ Example:
           ,@clauses))
       ,@(when allow-other-values?
           `((t ,var))))))
+
+;;; Utility functions
+
+(defmacro with-trivial-progress
+    ((operation
+      &optional format-control-or-condition-class
+      &rest format-arguments-or-initargs)
+     &body body)
+  "Signal one progress condition for OPERATION for the start and end
+of the execution of BODY respectively.
+
+As with `cl:signal', `cl:error' and `cl:warn',
+FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+either specify a condition class and initargs or a report format
+control string and format arguments."
+  (once-only (operation)
+    `(unwind-protect
+          (progn
+            (progress ,operation 0 ,format-control-or-condition-class
+                      ,@format-arguments-or-initargs)
+            ,@body)
+       (progress ,operation t))))
+
+(defmacro with-sequence-progress ((operation sequence) &body body)
+  "Signal progress conditions for OPERATION on SEQUENCE during the
+execution of BODY.
+
+The function `progress' is shadowed in the lexical scope of BODY with
+the following syntax:
+
+  progress [ format-control-or-condition-class
+             format-arguments-or-initargs* ]
+
+Calling this function indicates that the processing of SEQUENCE
+advanced by one element. As with `cl:signal', `cl:error' and
+`cl:warn', FORMAT-CONTROL-OR-CONDITION-CLASS and
+FORMAT-ARGUMENTS-OR-INITARGS either specify a condition class and
+initargs or a report format control string and format arguments.
+
+After the completion of or non-local exit from BODY, a condition
+indicating the completion of OPERATION is signaled automatically."
+  (with-gensyms (length)
+    (once-only (operation sequence)
+      `(unwind-protect
+            (let ((,length (length ,sequence))
+                  (i       0))
+              (flet ((compute-progress ()
+                       (/ (1- (incf i)) ,length))
+                     (progress (&optional format-control-or-condition-class
+                                &rest format-arguments-or-initargs)
+                       (apply #'progress ,operation nil
+                              format-control-or-condition-class
+                              format-arguments-or-initargs)))
+                (handler-bind
+                    ((progress-condition
+                       (lambda (condition)
+                         (unless (progress-condition-progress condition)
+                           (setf (progress-condition-progress condition)
+                                 (compute-progress))))))
+                  ,@body)))
+         (progress ,operation t)))))

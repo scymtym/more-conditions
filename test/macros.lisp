@@ -157,3 +157,66 @@ which adds additional initargs via
                   (ensure-condition 'program-error (do-it nil)))
                  (t
                   (ensure-same (do-it nil) expected))))))))
+
+;;; Progress macros
+
+(deftestsuite with-trivial-progress-root (macros-root)
+  ()
+  (:documentation
+   "Unit tests for the `with-trivial-progress' macro."))
+
+(addtest (with-trivial-progress-root
+          :documentation
+          "Smoke test for the `with-trivial-progress' macro.")
+  smoke
+
+  (macrolet
+      ((test (&rest args)
+         `(let ((conditions '()))
+            (handler-bind ((progress-condition
+                             (lambda (condition)
+                               (push condition conditions))))
+              (with-trivial-progress ,args))
+            (mapc #'princ-to-string conditions)
+            (ensure-same 2 (length conditions) :test #'=))))
+
+    (test :foo)
+    (test :foo "bar")
+    (test :foo "bar: ~A" :baz)
+    (test :foo 'simple-progress-condition)
+    (test :foo 'simple-progress-condition
+               :format-control "bar")
+    (test :foo 'simple-progress-condition
+               :format-control   "bar: ~A"
+               :format-arguments '(:baz))))
+
+(deftestsuite with-sequence-progress-root (macros-root)
+  ()
+  (:documentation
+   "Unit tests for the `with-sequence-progress' macro."))
+
+(addtest (with-sequence-progress-root
+           :documentation
+           "Smoke test for the `with-sequence-progress' macro.")
+  smoke
+
+  (macrolet
+      ((test ((&rest args) &body body)
+         `(let ((conditions '()))
+            (handler-bind ((progress-condition
+                             (lambda (condition)
+                               (push condition conditions))))
+              (with-sequence-progress ,args ,@body))
+            (mapc #'princ-to-string conditions)
+            (ensure-same 2 (length conditions) :test #'=))))
+
+    (test (:foo '(1 2)) (progress))
+    (test (:foo '(1 2)) (progress "bar"))
+    (test (:foo '(1 2)) (progress "bar: ~A" :baz))
+    (test (:foo '(1 2)) (progress 'simple-progress-condition))
+    (test (:foo '(1 2))
+      (progress 'simple-progress-condition :format-control "bar"))
+    (test (:foo '(1 2))
+      (progress 'simple-progress-condition
+                :format-control   "bar: ~A"
+                :format-arguments '(:baz)))))

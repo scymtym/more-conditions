@@ -20,7 +20,7 @@
 (defparameter +version-major+ 0
   "Major component of version number.")
 
-(defparameter +version-minor+ 3
+(defparameter +version-minor+ 4
   "Minor component of version number.")
 
 (defparameter +version-revision+ 0
