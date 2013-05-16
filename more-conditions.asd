@@ -55,7 +55,9 @@ boundaries in larger systems."
                               (:file       "types")
                               (:file       "variables")
                               (:file       "conditions")
-                              (:file       "macros"))))
+                              (:file       "macros")))
+
+                (:static-file "README.org"))
 
   :in-order-to ((test-op (test-op :more-conditions-test))))
 
