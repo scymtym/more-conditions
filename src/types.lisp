@@ -31,3 +31,30 @@ LINK, if present, is a string."
 (defun reference-link (spec)
   "Return the link of SPEC."
   (third spec))
+
+;;; progress related types
+
+(deftype progress-designator ()
+  "Values describe progress of an operation.
+
+nil
+
+  Progress is not known
+
+t
+
+  Task has been completed.
+
+real
+
+  Completion percentage as a real number between 0 (no progress) and
+  1 (completed; note that t should be used in this case, at least in a
+  subsequently signaled condition)."
+  '(or null (eql t) (real 0 1)))
+
+(defun progress->real (progress)
+  (declare (type progress-designator progress))
+  (case progress
+    ((nil)  0)
+    ((t)    1)
+    (t      progress)))

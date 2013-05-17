@@ -269,26 +269,12 @@ instances."))
               "Stores a symbol identifying the operation for which the
 condition reports progress.")
    (progress  :initarg  :progress
-              :type     (or nil t (real 0 1))
+              :type     progress-designator
               :accessor progress-condition-progress
               :initform nil
               :documentation
               "Stores the operation progress indicated by the
-condition. The following forms are allowed:
-
-nil
-
-  Progress is not known
-
-t
-
-  Task has been completed.
-
-real
-
-  Completion percentage as a real number between 0 (no progress) and
-  1 (completed; note that t should be used in this case, at least in a
-  subsequently signaled condition)."))
+condition. See type `progress-designator'."))
   (:documentation
    "This condition is signaled to indicate the progress of execution
 of an operation during the execution of that operation
@@ -335,6 +321,7 @@ As with `cl:signal', `cl:error' and `cl:warn',
 FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
 either specify a condition class and initargs or a report report
 format control string and format arguments."
+  (declare (type progress-designator progress))
   (if (stringp format-control-or-condition-class)
       (signal 'simple-progress-condition
               :operation        operation
@@ -366,7 +353,8 @@ onto STREAM. AT? and COLON? are ignored."
                       (circular-list max-name-length) parameters values)))))
 
 (defun print-progress-percentage (stream progress &optional colon? at?)
-  (declare (ignore colon? at?))
+  (declare (ignore colon? at?)
+           (type progress-designator progress))
   (format stream "~:[???.??~;~:*~6,2,2F~] %"
           (case progress
             ((nil) nil)

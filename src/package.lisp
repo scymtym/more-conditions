@@ -17,7 +17,11 @@
    #:reference-part
    #:reference-link
 
-   #:print-reference)
+   #:print-reference
+
+   #:progress-designator
+
+   #:progress->real)
 
   ;; Variables
   (:export
