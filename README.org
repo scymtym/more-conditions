@@ -198,7 +198,11 @@
   signaling system. Further, signaling code does not have to care or
   even know whether the signaled progress conditions are actually
   handled or not in a particular situation since program execution
-  remains unaffected.
+  remains unaffected. Despite the hopefully low impact on program
+  design and code organization, there is some overhead involved in
+  signaling, and potentially handling, progress conditions. Therefore,
+  some amount of care is required when signaling progress conditions
+  form inner loops.
 
   In the =more-conditions= system, there are two builtin progress
   condition classes: =more-conditions:progress-condition= and
