@@ -334,6 +334,35 @@ control string and format arguments."
              :progress  progress
              format-arguments-or-initargs)))
 
+(defun progressing (function operation
+                    &optional
+                    format-control-or-condition-class
+                    &rest format-arguments-or-initargs)
+  "Return a function which signals a progress condition for OPERATION
+and calls FUNCTION.
+
+As with `cl:signal', `cl:error' and `cl:warn',
+FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+either specify a condition class and initargs or a report format
+control string and format arguments. However, if
+FORMAT-CONTROL-OR-CONDITION-CLASS is nil, a format string which prints
+all arguments passed to FUNCTION is used.
+
+Example:
+
+  (let ((items '(1 2 3 4 5)))
+    (with-sequence-progress (:foo items)
+      (mapcar (progressing #'1+ :foo \"Frobbing\") items)))"
+  (if format-control-or-condition-class
+      (lambda (&rest args)
+        (apply #'progress operation nil
+               format-control-or-condition-class
+               format-arguments-or-initargs)
+        (apply function args))
+      (lambda (&rest args)
+        (apply #'progress operation nil "~@{~A~^ ~}" args)
+        (apply function args))))
+
 ;;; Utility functions
 
 (defun print-arguments (stream parameters-and-values &optional at? colon?)

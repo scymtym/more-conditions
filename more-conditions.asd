@@ -23,7 +23,7 @@
 (defparameter +version-minor+ 4
   "Minor component of version number.")
 
-(defparameter +version-revision+ 1
+(defparameter +version-revision+ 2
   "Revision component of version number.")
 
 (defun version/list ()

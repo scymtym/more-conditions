@@ -69,7 +69,8 @@
 
    #:simple-progress-condition
 
-   #:progress)
+   #:progress
+   #:progressing)
 
   ;; Macros
   (:export

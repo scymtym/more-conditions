@@ -201,22 +201,46 @@ which adds additional initargs via
   smoke
 
   (macrolet
-      ((test ((&rest args) &body body)
+      ((test ((expected-conditions operation sequence &rest args) &body body)
          `(let ((conditions '()))
             (handler-bind ((progress-condition
                              (lambda (condition)
                                (push condition conditions))))
-              (with-sequence-progress ,args ,@body))
+              (let ((sequence ,sequence))
+                (with-sequence-progress (,operation sequence ,@(rest args))
+                  ,@body)))
             (mapc #'princ-to-string conditions)
-            (ensure-same 2 (length conditions) :test #'=))))
+            (ensure-same ,expected-conditions (length conditions)
+                         :test #'=))))
 
-    (test (:foo '(1 2)) (progress))
-    (test (:foo '(1 2)) (progress "bar"))
-    (test (:foo '(1 2)) (progress "bar: ~A" :baz))
-    (test (:foo '(1 2)) (progress 'simple-progress-condition))
-    (test (:foo '(1 2))
+    ;; `progress'
+    (test (2 :foo '(1 2)) (progress))
+    (test (2 :foo '(1 2)) (progress "bar"))
+    (test (2 :foo '(1 2)) (progress "bar: ~A" :baz))
+    (test (2 :foo '(1 2)) (progress 'simple-progress-condition))
+    (test (2 :foo '(1 2))
       (progress 'simple-progress-condition :format-control "bar"))
-    (test (:foo '(1 2))
+    (test (2 :foo '(1 2))
       (progress 'simple-progress-condition
                 :format-control   "bar: ~A"
-                :format-arguments '(:baz)))))
+                :format-arguments '(:baz)))
+
+    ;; `progressing'
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo) sequence))
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo "bar") sequence))
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo "bar: ~A" :baz) sequence))
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo 'simple-progress-condition)
+            sequence))
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo 'simple-progress-condition
+                              :format-control "bar")
+            sequence))
+    (test (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo 'simple-progress-condition
+                              :format-control   "bar: ~A"
+                              :format-arguments '(:baz))
+            sequence))))

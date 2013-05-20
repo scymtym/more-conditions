@@ -242,6 +242,14 @@
           (more-conditions:progress "Processing element ~A" item)
           (sleep 1)))))
   #+END_SRC
+  When using higher-order functions to process sequences the
+  =more-conditions:progressing= function can be used:
+  #+BEGIN_SRC lisp
+  (handler-bind ((more-conditions:progress-condition #'princ))
+    (let ((items (alexandria:iota 5)))
+      (more-conditions:with-sequence-progress (:frob items)
+        (mapcar (more-conditions:progressing #'1+ :frob) items))))
+  #+END_SRC
 * Embedding Documentation References in Conditions
   It is sometimes useful to include pointers to documentation in
   signaled conditions. =more-conditions= supports this via the generic
