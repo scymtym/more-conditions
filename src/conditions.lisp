@@ -319,8 +319,8 @@ for OPERATION.
 
 As with `cl:signal', `cl:error' and `cl:warn',
 FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
-either specify a condition class and initargs or a report report
-format control string and format arguments."
+either specify a condition class and initargs or a report format
+control string and format arguments."
   (declare (type progress-designator progress))
   (if (stringp format-control-or-condition-class)
       (signal 'simple-progress-condition
