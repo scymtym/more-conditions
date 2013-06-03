@@ -49,6 +49,7 @@ conjunction with support functions and macros."
 In addition, there is support for translating condition at layer
 boundaries in larger systems."
   :depends-on  (:alexandria)
+  :encoding    :utf-8
   :components  ((:module     "src"
                  :serial     t
                  :components ((:file       "package")
@@ -69,6 +70,7 @@ boundaries in larger systems."
   :description "Unit tests for the more-conditions system."
   :depends-on  ((:version :more-conditions #.(version/string))
                 (:version :lift            "1.7.1"))
+  :encoding    :utf-8
   :components  ((:module     "test"
                  :serial     t
                  :components ((:file       "package")
