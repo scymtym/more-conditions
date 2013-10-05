@@ -213,24 +213,13 @@
 
 ;;; Class `reference-condition'
 
-(defun print-reference (stream spec &optional at? colon?)
-  "Print reference SPEC onto STREAM.
-   AT? and COLON? are ignored."
-  (declare (ignore at? colon?)
-           (type reference-spec spec))
-  (with-accessors ((document reference-document)
-                   (part     reference-part)
-                   (link     reference-link)) spec
-    (format stream "~A, ~:_~{~A~^ » ~}~@[ ~:_<~A>~]"
-            document (ensure-list part) link)))
-
 ;; Note: based on identically named class in SBCL's
 ;; src/code/condition.lisp
 (define-condition reference-condition (condition)
   ((references :initarg  :references
-               :type     list ; of `reference-spec'
-               :reader   condition-references
-               :initform '()
+               :type     (or (eql :compute ) list #|of reference-spec|#)
+               :accessor condition-%references
+               :initform :compute
                :documentation
                "Stores a list of references of type
                 `reference-spec'."))
@@ -238,6 +227,20 @@
    "This condition class is intended to be mixed into condition
     classes which can associate documentation references to their
     instances."))
+
+(defmethod condition-references ((condition reference-condition))
+  (let ((value (condition-%references condition)))
+    (case value
+      (:compute (setf (condition-%references condition)
+                      (default-references (class-of condition))))
+      (t        value))))
+
+;; This makes sure that :direct-references is a valid initarg for
+;; `reference-condition'.
+(defmethod shared-initialize :before ((instance   reference-condition)
+                                      (slot-names t)
+                                      &key direct-references)
+  (declare (ignore direct-references)))
 
 (defmethod print-object :after ((object reference-condition) stream)
   (when (and (not *print-escape*) (not *print-readably*)
@@ -391,6 +394,17 @@
       (format stream "~:{~,,1<~%~2@T~VS~;~S~>~}"
               (mapcar #'list
                       (circular-list max-name-length) parameters values)))))
+
+(defun print-reference (stream spec &optional at? colon?)
+  "Print reference SPEC onto STREAM.
+   AT? and COLON? are ignored."
+  (declare (ignore at? colon?)
+           (type reference-spec spec))
+  (with-accessors ((document reference-document)
+                   (part     reference-part)
+                   (link     reference-link)) spec
+    (format stream "~A, ~:_~{~A~^ » ~}~@[ ~:_<~A>~]"
+            document (ensure-list part) link)))
 
 (defun print-progress-percentage (stream progress &optional colon? at?)
   (declare (ignore colon? at?)

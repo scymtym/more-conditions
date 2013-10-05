@@ -23,7 +23,7 @@
 (defparameter +version-minor+ 4
   "Minor component of version number.")
 
-(defparameter +version-revision+ 3
+(defparameter +version-revision+ 4
   "Revision component of version number.")
 
 (defun version/list ()
@@ -49,7 +49,8 @@
 
                      In addition, there is support for translating
                      conditions at layer boundaries in larger systems."
-  :depends-on  (:alexandria)
+  :depends-on  (:alexandria
+                (:version :closer-mop "0.61"))
   :encoding    :utf-8
   :components  ((:module     "src"
                  :serial     t

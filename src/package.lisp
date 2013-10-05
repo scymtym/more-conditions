@@ -58,6 +58,8 @@
 
    ;; references
    #:condition-references
+   #:direct-default-references
+   #:default-references
 
    #:reference-condition
 

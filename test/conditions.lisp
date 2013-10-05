@@ -94,7 +94,15 @@
 
 ;;; Program error conditions
 
-(defmacro define-condition-suite ((name &key (constructor name))
+(defun princ-to-string-with-special-bindings (bindings thing)
+  (progv (mapcar #'first bindings)
+      (mapcar #'second bindings)
+    (princ-to-string thing)))
+
+(defmacro define-condition-suite ((name
+                                   &key
+                                   (constructor name)
+                                   (repeat      1))
                                   &body cases)
   (let ((suite-name            (make-keyword name))
         (condition-case-name   (symbolicate
@@ -113,11 +121,14 @@
          ,(format nil "Test printing instances of the `~(~A~)' condition class"
                   name)
 
-         (mapc (lambda+ ((initargs constructor-args expected))
+         (mapc (lambda+ ((initargs expected
+                          &key constructor-args special-bindings))
                  (declare (ignore constructor-args))
-                 (is (string= expected
-                              (princ-to-string
-                               (apply #'make-condition ',name initargs)))))
+                 (let ((instance (apply #'make-condition ',name initargs)))
+                   (loop :repeat ,repeat :do
+                      (is (string= expected
+                                   (princ-to-string-with-special-bindings
+                                    special-bindings instance))))))
                (list ,@cases)))
 
        ,@(when (fboundp constructor)
@@ -125,95 +136,98 @@
                ,(format nil "Test printing instances of the `~(~A~)' condition class"
                         name)
 
-               (mapc (lambda+ ((initargs constructor-args expected))
+               (mapc (lambda+ ((initargs expected
+                                &key constructor-args special-bindings))
                        (declare (ignore initargs))
                        (unless (eq constructor-args :skip)
                          (is (string= expected
                                       (handler-case
                                           (apply #',constructor constructor-args)
                                         (,name (condition)
-                                          (princ-to-string condition)))))))
+                                          (princ-to-string-with-special-bindings
+                                           special-bindings condition)))))))
                      (list ,@cases))))))))
 
 (define-condition-suite (missing-required-argument)
   '((:parameter :foo)
-    (:foo)
-    "No value has been supplied for the required parameter :FOO."))
+    "No value has been supplied for the required parameter :FOO."
+    :constructor-args (:foo)))
 
 (define-condition-suite (incompatible-arguments)
   '((:parameters () :values ())
-    ()
     "No arguments are invalid.")
   '((:parameters (:foo) :values (1))
-    (:foo 1)
     "The combination of arguments
 
   :FOO 1
 
-is invalid.")
+is invalid."
+    :constructor-args (:foo 1))
   '((:parameters (:foo :barbar) :values (1 2))
-    (:foo 1 :barbar 2)
     "The combination of arguments
 
   :FOO    1
   :BARBAR 2
 
-is invalid.")
+is invalid."
+    :constructor-args (:foo 1 :barbar 2))
   `((:parameters (:foo)
      :values     (1)
      :cause      ,(make-instance 'simple-error
                                  :format-control "foo"))
-    :skip
     "The combination of arguments
 
   :FOO 1
 
 is invalid.
 Caused by:
-> foo"))
+> foo"
+    :constructor-args :skip))
 
 (define-condition-suite (initarg-error)
   '((:class :foo)
-    nil
     "Invalid initargs have been supplied for class :FOO."))
 
 (define-condition-suite (missing-required-initarg)
   '((:class :foo :parameter :bar)
-    (:foo :bar)
-    "The initarg :BAR is required by class :FOO, but has not been supplied."))
+    "The initarg :BAR is required by class :FOO, but has not been supplied."
+    :constructor-args (:foo :bar)))
 
 (define-condition-suite (incompatible-initargs)
   '((:class :foo :parameters () :values ())
-    (:foo)
-    "No initargs are invalid for class :FOO.")
+    "No initargs are invalid for class :FOO."
+    :constructor-args (:foo))
+
   '((:class :foo :parameters (:bar) :values (1))
-    (:foo :bar 1)
     "The combination of initargs
 
   :BAR 1
 
-is invalid for class :FOO.")
+is invalid for class :FOO."
+    :constructor-args (:foo :bar 1))
+
   '((:class :foo :parameters (:bar :bazbaz) :values (1 2))
-    (:foo :bar 1 :bazbaz 2)
     "The combination of initargs
 
   :BAR    1
   :BAZBAZ 2
 
-is invalid for class :FOO.")
+is invalid for class :FOO."
+    :constructor-args (:foo :bar 1 :bazbaz 2))
+
   `((:class      :foo
      :parameters (:bar)
      :values     (1)
      :cause      ,(make-instance 'simple-error
                                  :format-control "foo"))
-    :skip
     "The combination of initargs
 
   :BAR 1
 
 is invalid for class :FOO.
 Caused by:
-> foo"))
+> foo"
+    :constructor-args :skip))
 
 ;;; `reference-condition'
 
@@ -221,32 +235,45 @@ Caused by:
   ()
   (:report "Reference Error."))
 
-(define-condition-suite (reference-error)
-  '((:references ())
-    ()
+(define-condition-suite (reference-error
+                         :repeat 2) ; because of caching
+
+  ;; No initargs => no references are printed.
+  '(()
     "Reference Error.")
 
+  ;; Explicit empty list of references => no references are printed.
+  '((:references ())
+    "Reference Error.")
+
+  ;; A single reference => it is printed.
   '((:references ((:foo "bar")))
-    ()
     "Reference Error.
 See also:
   FOO, bar")
 
+  ;; *print-references* is nil => references should not be printed.
+  '((:references ((:foo "bar")))
+    "Reference Error."
+    :special-bindings ((*print-references* nil)))
+
+  ;; Multiple different references for the same document => they are
+  ;; all printed.
   '((:references ((:foo "bar")
                   (:foo ("bar" "baz"))
                   (:foo ("bar" "baz") "http://fez.org")))
-    ()
     "Reference Error.
 See also:
   FOO, bar
   FOO, bar » baz
   FOO, bar » baz <http://fez.org>")
-  ;; Test computed references.
+
+  ;; Reference is specified as a fucntion => the function is called
+  ;; and the returned reference is printed.
   `((:references ((:bar "baz")
                   ,(lambda (condition)
                      (declare (ignore condition))
                      '((:foo "bar" "http://fez.org")))))
-    ()
     "Reference Error.
 See also:
   BAR, baz
@@ -261,14 +288,14 @@ See also:
                              ~/more-conditions:maybe-print-cause/"
                      condition))))
 
-(define-condition-suite (mock-error/reference-condition)
+(define-condition-suite (mock-error/reference-condition
+                         :repeat 2) ; because of caching
   `((:references ((:foo "bar")
                   (:fez "whiz"))
      :cause      ,(make-condition 'reference-error
                                   :references '((:foo "bar")
                                                 (:foo "baz")
                                                 (:bar "fez" "http://whoop.org"))))
-    ()
     "Mock Error. Caused by:
 > Reference Error.
 See also:
@@ -277,69 +304,157 @@ See also:
   BAR, fez <http://whoop.org>
   FEZ, whiz"))
 
+(define-condition reference-condition.inheritance.super^2error
+    (error reference-condition)
+  ()
+  (:default-initargs
+   :direct-references '((:super^2 "super^2"))))
+
+(define-condition reference-condition.inheritance.supererror
+    (reference-condition.inheritance.super^2error)
+  ()
+  (:default-initargs
+   :direct-references '((:super "super" "http://super.org"))))
+
+(define-condition reference-condition.inheritance.suberror
+    (reference-condition.inheritance.supererror)
+  ()
+  (:default-initargs
+   :direct-references '((:sub "sub")))
+  (:report "Mock Error."))
+
+(define-condition-suite (reference-condition.inheritance.suberror
+                         :repeat 2) ; because of caching
+
+  ;; No initargs => :direct-references from transitive
+  ;; superclass-closure are collected and printed.
+  `(()
+    "Mock Error.
+See also:
+  SUB, sub
+  SUPER, super <http://super.org>
+  SUPER^2, super^2")
+
+  ;; :references initarg overwrites all default references.
+  '((:references ((:no-defaults "nodefaults")))
+    "Mock Error.
+See also:
+  NO-DEFAULTS, nodefaults"))
+
+(define-condition reference-condition.inheritance.supererror2
+    (reference-condition.inheritance.super^2error)
+  ()
+  (:default-initargs
+   :references :compute))
+
+(define-condition reference-condition.inheritance.suberror2
+    (reference-condition.inheritance.supererror2)
+  ()
+  (:default-initargs
+   :direct-references '((:sub "sub")))
+  (:report "Mock Error."))
+
+(define-condition-suite (reference-condition.inheritance.suberror2
+                         :repeat 2) ; because of caching
+
+  ;; No initargs => :direct-references from transitive
+  ;; superclass-closure are collected and printed.
+  '(()
+    "Mock Error.
+See also:
+  SUB, sub
+  SUPER^2, super^2")
+
+  ;; :references initarg overwrites all default references.
+  '((:references ((:no-defaults "nodefaults")))
+    "Mock Error.
+See also:
+  NO-DEFAULTS, nodefaults"))
+
 (test reference-condition.print/logical-block
   "Test printing of `reference-condition' within a logical block."
 
-  (is (string=
-       #+sbcl "| Mock Error. Caused by:
+  (mapc
+   (lambda+ ((class initargs expected ))
+     (is (string= expected
+                  (format nil "~@<| ~@;~A~:>"
+                          (apply #'make-condition class initargs)))))
+
+   `((reference-condition.inheritance.suberror
+      (:references ((:foo "bar")
+                    (:fez "whiz")))
+      #+sbcl "| Mock Error.
+| See also:
+|   FOO, bar
+|   FEZ, whiz"
+      #-sbcl "| Mock Error. See also:
+|   FOO, bar
+|   FEZ, whiz")
+
+     (mock-error/reference-condition
+      (:references ((:foo "bar")
+                    (:fez "whiz"))
+       :cause      ,(make-condition
+                     'reference-error
+                     :references '((:foo "bar")
+                                   (:foo "baz")
+                                   (:bar "fez" "http://whoop.org"))))
+      #+sbcl "| Mock Error. Caused by:
 | > Reference Error.
 | See also:
 |   FOO, bar
 |   FOO, baz
 |   BAR, fez <http://whoop.org>
 |   FEZ, whiz"
-       #-sbcl "| Mock Error. Caused by:
+      #-sbcl "| Mock Error. Caused by:
 | > Reference Error. See also:
 |   FOO, bar
 |   FOO, baz
 |   BAR, fez <http://whoop.org>
-|   FEZ, whiz"
-       (format nil "~@<| ~@;~A~:>"
-               (make-condition
-                'mock-error/reference-condition
-                :references '((:foo "bar")
-                              (:fez "whiz"))
-                :cause      (make-condition
-                             'reference-error
-                             :references '((:foo "bar")
-                                           (:foo "baz")
-                                           (:bar "fez" "http://whoop.org"))))))))
+|   FEZ, whiz"))))
 
 ;;; Progress conditions
 
 (define-condition-suite (progress-condition :constructor progress)
   `(()
-    ()
     "???.?? %")
+
   `((:operation :foo)
-    (:foo)
-    "FOO: ???.?? %")
+    "FOO: ???.?? %"
+    :constructor-args (:foo))
+
   `((:operation :foo :progress nil)
-    (:foo nil)
-    "FOO: ???.?? %")
+    "FOO: ???.?? %"
+    :constructor-args (:foo nil))
+
   `((:operation :foo :progress 0)
-    (:foo 0)
-    "FOO:   0.00 %")
+    "FOO:   0.00 %"
+    :constructor-args (:foo 0))
+
   `((:operation :foo :progress 1)
-    (:foo 1)
-    "FOO: 100.00 %")
+    "FOO: 100.00 %"
+    :constructor-args (:foo 1))
+
   `((:operation :foo :progress t)
-    (:foo t)
-    "FOO: 100.00 %")
+    "FOO: 100.00 %"
+    :constructor-args (:foo t))
+
   `((:operation :foo :progress .51234)
-    (:foo .51234 progress-condition)
-    "FOO:  51.23 %"))
+    "FOO:  51.23 %"
+    :constructor-args (:foo .51234 progress-condition)))
 
 (define-condition-suite (simple-progress-condition :constructor progress)
   `((:operation :foo :progress .51234)
-    (:foo .51234 simple-progress-condition)
-    "FOO:  51.23 %")
+    "FOO:  51.23 %"
+    :constructor-args (:foo .51234 simple-progress-condition))
+
   `((:operation :foo :progress .51234 :format-control "bar")
-    (:foo .51234 "bar")
-    "FOO:  51.23 %: bar")
+    "FOO:  51.23 %: bar"
+    :constructor-args (:foo .51234 "bar"))
+
   `((:operation        :foo
      :progress         .51234
      :format-control   "bar: ~A"
      :format-arguments (:baz))
-    (:foo .51234 "bar: ~A" :baz)
-    "FOO:  51.23 %: bar: BAZ"))
+    "FOO:  51.23 %: bar: BAZ"
+    :constructor-args (:foo .51234 "bar: ~A" :baz)))
