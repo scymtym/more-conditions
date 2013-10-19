@@ -84,28 +84,28 @@
 
   (:documentation
    "This package provides generic conditions and condition-related
-utilities.
+    utilities.
 
-Conditions
-* `chainable-condition'
-* `missing-required-argument'
-  * `missing-required-initarg'
-* `incompatible-arguments'
-  * `incompatible-initargs'
-* `reference-condition'
-* `progress-condition'
-  * `simple-progress-condition'
+    Conditions
+    * `chainable-condition'
+    * `missing-required-argument'
+      * `missing-required-initarg'
+    * `incompatible-arguments'
+      * `incompatible-initargs'
+    * `reference-condition'
+    * `progress-condition'
+      * `simple-progress-condition'
 
-Condition helper functions
-* `maybe-print-cause'
-* `maybe-print-explanation'
-* `print-reference'
+    Condition helper functions
+    * `maybe-print-cause'
+    * `maybe-print-explanation'
+    * `print-reference'
 
-Macros
-* `with-condition-translation'
-* `define-condition-translating-method'
+    Macros
+    * `with-condition-translation'
+    * `define-condition-translating-method'
 
-* `error-behavior-restart-cases'
+    * `error-behavior-restart-cases'
 
-* `with-trivial-progress'
-* `with-sequence-progress'"))
+    * `with-trivial-progress'
+    * `with-sequence-progress'"))

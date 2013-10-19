@@ -10,7 +10,7 @@
   ()
   (:documentation
    "Root test suite for conditions and condition-related helper
-functions provided by the more-conditions system."))
+    functions provided by the more-conditions system."))
 
 (deftestsuite maybe-print-cause-root (conditions-root)
   ()
@@ -30,7 +30,7 @@ functions provided by the more-conditions system."))
 (addtest (maybe-print-cause-root
           :documentation
           "Test printing condition instances using the
-`maybe-print-cause' helper function.")
+           `maybe-print-cause' helper function.")
   print
 
   (ensure-cases (initargs expected)
@@ -64,7 +64,7 @@ functions provided by the more-conditions system."))
 (addtest (maybe-print-explanation-root
           :documentation
           "Test printing condition instances using the
-`maybe-print-explanation' helper function.")
+           `maybe-print-explanation' helper function.")
   print
 
   (ensure-cases (initargs expected)

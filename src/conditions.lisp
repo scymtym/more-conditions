@@ -13,14 +13,14 @@
     nil)
   (:documentation
    "Return the condition that was signaled and caused CONDITION to be
-signaled."))
+    signaled."))
 
 (defgeneric root-cause (condition)
   (:method ((condition condition))
     condition)
   (:documentation
    "Return the condition that was originally signaled and eventually
-caused CONDITION to be signaled."))
+    caused CONDITION to be signaled."))
 
 (define-condition chainable-condition (condition)
   ((cause :initarg  :cause
@@ -29,12 +29,12 @@ caused CONDITION to be signaled."))
           :initform nil
           :documentation
           "The condition which originally caused the condition to be
-signaled."))
+           signaled."))
   (:documentation
    "Instances of this class can contain another condition instance
-which originally caused the condition to be signaled. This structure
-can continue recursively thus forming a chain of causing
-conditions."))
+    which originally caused the condition to be signaled. This
+    structure can continue recursively thus forming a chain of causing
+    conditions."))
 
 (defmethod root-cause ((condition chainable-condition))
   (if-let ((cause (cause condition)))
@@ -43,7 +43,7 @@ conditions."))
 
 (defun maybe-print-cause (stream condition &optional colon? at?)
   "Print the condition that caused CONDITION to be signaled (if any)
-onto STREAM."
+   onto STREAM."
   (declare (ignore colon? at?))
   (let ((*print-references* (eq *print-references* :force)))
     (format stream "~@[ ~_Caused by:~&~@<> ~@;~A~@:>~]"
@@ -51,19 +51,19 @@ onto STREAM."
 
 (defun maybe-print-explanation (stream condition &optional colon? at?)
   "Format the message contained in the `simple-condition' CONDITION on
-STREAM.
+   STREAM.
 
-If CONDITION does not have a message, print \".\". This is intended
-for messages which can be either
+   If CONDITION does not have a message, print \".\". This is intended
+   for messages which can be either
 
-     \"MESSAGE.\"
-  or \"MESSAGE: EXPLANATION\".
+        \"MESSAGE.\"
+     or \"MESSAGE: EXPLANATION\".
 
-When COLON? is non-nil, the explanation is printed in an indented
-logical block.
+   When COLON? is non-nil, the explanation is printed in an indented
+   logical block.
 
-When AT? is non-nil and CONDITION does not have an explanation,
-suppress printing \".\"."
+   When AT? is non-nil and CONDITION does not have an explanation,
+   suppress printing \".\"."
   (cond
     ((simple-condition-format-control condition)
      (format stream ": ~_")
@@ -83,7 +83,7 @@ suppress printing \".\"."
               :reader   missing-required-argument-parameter
               :documentation
               "The parameter for which a value should have been
-supplied."))
+               supplied."))
   (:report
    (lambda (condition stream)
      (format stream "~@<No value has been supplied for the required ~
@@ -91,7 +91,7 @@ supplied."))
              (missing-required-argument-parameter condition))))
   (:documentation
    "This error is signaled when no value is supplied for a required
-parameter."))
+    parameter."))
 
 (defun missing-required-argument (parameter)
   "Signal a `missing-required-argument' error for PARAMETER."
@@ -105,7 +105,7 @@ parameter."))
                :reader   incompatible-arguments-parameters
                :documentation
                "A list of the parameters for which incompatible values
-have been supplied.")
+                have been supplied.")
    (values     :initarg  :values
                :type     list
                :reader   incompatible-arguments-values
@@ -122,13 +122,13 @@ have been supplied.")
                condition))))
   (:documentation
    "This error is signaled when an incompatible combination of
-arguments is supplied."))
+    arguments is supplied."))
 
 (defun incompatible-arguments (&rest arguments)
   "Signal an `incompatible-arguments' error for ARGUMENTS which has to
-be of the form
+   be of the form
 
-  PARAMETER1 VALUE1 PARAMETER2 VALUE2 ..."
+     PARAMETER1 VALUE1 PARAMETER2 VALUE2 ..."
   (let ((parameters (loop :for parameter :in arguments :by #'cddr
                        :collect parameter))
         (values     (loop :for value :in (rest arguments) :by #'cddr
@@ -164,7 +164,7 @@ be of the form
              (initarg-error-class                 condition))))
   (:documentation
    "This error is signaled when an initarg that is required by a class
-is not supplied."))
+    is not supplied."))
 
 (defun missing-required-initarg (class initarg)
   "Signal a `missing-required-initarg' error for CLASS and INITARG."
@@ -204,7 +204,7 @@ is not supplied."))
 
 (defun print-reference (stream spec &optional at? colon?)
   "Print reference SPEC onto STREAM.
-AT? and COLON? are ignored."
+   AT? and COLON? are ignored."
   (declare (ignore at? colon?))
   (with-accessors ((document reference-document)
                    (part     reference-part)
@@ -215,16 +215,16 @@ AT? and COLON? are ignored."
 (defgeneric condition-references (condition)
   (:documentation
    "Return a list of references (of type `reference-spec') which are
-associated to CONDITION."))
+    associated to CONDITION."))
 
 (defmethod condition-references ((condition t))
   "Return nil since arbitrary objects do not have references
-associated to them."
+   associated to them."
   nil)
 
 (defmethod condition-references :around ((condition chainable-condition))
   "Merge references associated to CONDITION with those associated to
-the transitive causes of CONDITION."
+   the transitive causes of CONDITION."
   (remove-duplicates
    (append (when-let ((cause (cause condition)))
              (condition-references cause))
@@ -241,11 +241,11 @@ the transitive causes of CONDITION."
                :initform '()
                :documentation
                "Stores a list of references of type
-`reference-spec'."))
+                `reference-spec'."))
   (:documentation
    "This condition class is intended to be mixed into condition
-classes which can associate documentation references to their
-instances."))
+    classes which can associate documentation references to their
+    instances."))
 
 (defmethod print-object :after ((object reference-condition) stream)
   (when (and (not *print-escape*) (not *print-readably*)
@@ -271,20 +271,20 @@ instances."))
               :initform nil
               :documentation
               "Stores a symbol identifying the operation for which the
-condition reports progress.")
+               condition reports progress.")
    (progress  :initarg  :progress
               :type     progress-designator
               :accessor progress-condition-progress
               :initform nil
               :documentation
               "Stores the operation progress indicated by the
-condition. See type `progress-designator'."))
+               condition. See type `progress-designator'."))
   (:documentation
    "This condition is signaled to indicate the progress of execution
-of an operation during the execution of that operation
+    of an operation during the execution of that operation
 
-Note that this condition does not have to be handled and its signaling
-usually does not lead to a transfer of control."))
+    Note that this condition does not have to be handled and its
+    signaling usually does not lead to a transfer of control."))
 
 (defmethod print-object ((object progress-condition) stream)
   (flet ((do-it ()
@@ -302,8 +302,8 @@ usually does not lead to a transfer of control."))
   ()
   (:documentation
    "Like `progress-condition' but supports format control and format
-arguments to produce a report to go along with the raw progress
-information."))
+    arguments to produce a report to go along with the raw progress
+    information."))
 
 (defmethod progress-condition-message ((condition simple-progress-condition))
   (apply #'format nil
@@ -319,12 +319,12 @@ information."))
                  format-control-or-condition-class
                  &rest format-arguments-or-initargs)
   "Signal a progress condition indicating completion status PROGRESS
-for OPERATION.
+   for OPERATION.
 
-As with `cl:signal', `cl:error' and `cl:warn',
-FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
-either specify a condition class and initargs or a report format
-control string and format arguments."
+   As with `cl:signal', `cl:error' and `cl:warn',
+   FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+   either specify a condition class and initargs or a report format
+   control string and format arguments."
   (declare (type progress-designator progress))
   (if (stringp format-control-or-condition-class)
       (signal 'simple-progress-condition
@@ -343,20 +343,20 @@ control string and format arguments."
                     format-control-or-condition-class
                     &rest format-arguments-or-initargs)
   "Return a function which signals a progress condition for OPERATION
-and calls FUNCTION.
+   and calls FUNCTION.
 
-As with `cl:signal', `cl:error' and `cl:warn',
-FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
-either specify a condition class and initargs or a report format
-control string and format arguments. However, if
-FORMAT-CONTROL-OR-CONDITION-CLASS is nil, a format string which prints
-all arguments passed to FUNCTION is used.
+   As with `cl:signal', `cl:error' and `cl:warn',
+   FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+   either specify a condition class and initargs or a report format
+   control string and format arguments. However, if
+   FORMAT-CONTROL-OR-CONDITION-CLASS is nil, a format string which
+   prints all arguments passed to FUNCTION is used.
 
-Example:
+   Example:
 
-  (let ((items '(1 2 3 4 5)))
-    (with-sequence-progress (:foo items)
-      (mapcar (progressing #'1+ :foo \"Frobbing\") items)))"
+     (let ((items '(1 2 3 4 5)))
+       (with-sequence-progress (:foo items)
+         (mapcar (progressing #'1+ :foo \"Frobbing\") items)))"
   (if format-control-or-condition-class
       (lambda (&rest args)
         (apply #'progress operation nil
@@ -372,9 +372,9 @@ Example:
 (defun print-arguments (stream parameters-and-values &optional at? colon?)
   "Print PARAMETERS-AND-VALUES which has to be of the form
 
-  (PARAMETERS VALUES)
+     (PARAMETERS VALUES)
 
-onto STREAM. AT? and COLON? are ignored."
+   onto STREAM. AT? and COLON? are ignored."
   (declare (ignore at? colon?))
   (destructuring-bind (parameters values) parameters-and-values
     (let ((max-name-length

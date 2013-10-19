@@ -12,4 +12,4 @@
 
 (defvar *print-references* t
   "When non-nil, `reference-condition' instances print reference
-information in addition to the primary condition report.")
+   information in addition to the primary condition report.")

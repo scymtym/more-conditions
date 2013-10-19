@@ -11,10 +11,10 @@
 (deftype reference-spec ()
   "A documentation reference of the form
 
-  (DOCUMENT PART [LINK])
+     (DOCUMENT PART [LINK])
 
-where DOCUMENT is a keyword, PART is a string or list of strings and
-LINK, if present, is a string."
+   where DOCUMENT is a keyword, PART is a string or list of strings
+   and LINK, if present, is a string."
   '(cons keyword                      ; document
          (cons (or string list)       ; part
                (cons (or null string) ; link
@@ -37,19 +37,19 @@ LINK, if present, is a string."
 (deftype progress-designator ()
   "Values describe progress of an operation.
 
-nil
+   nil
 
-  Progress is not known
+     Progress is not known
 
-t
+   t
 
-  Task has been completed.
+     Task has been completed.
 
-real
+   real
 
-  Completion percentage as a real number between 0 (no progress) and
-  1 (completed; note that t should be used in this case, at least in a
-  subsequently signaled condition)."
+     Completion percentage as a real number between 0 (no progress)
+     and 1 (completed; note that t should be used in this case, at
+     least in a subsequently signaled condition)."
   '(or null (eql t) (real 0 1)))
 
 (defun progress->real (progress)
