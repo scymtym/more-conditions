@@ -30,12 +30,14 @@
 (defmethod condition-references :around ((condition chainable-condition))
   ;; Merge references associated to CONDITION with those associated to
   ;; the transitive causes of CONDITION.
-  (remove-duplicates
-   (append (when-let ((cause (cause condition)))
-             (condition-references cause))
-           (call-next-method))
-   :test     #'equal
-   :from-end t))
+  ;;
+  ;; Place references associated to causing conditions in front since
+  ;; they should be more specific in most cases.
+  (remove-duplicates (append (when-let ((cause (cause condition)))
+                               (condition-references cause))
+                             (call-next-method))
+                     :test     #'equal
+                     :from-end t))
 
 (defun maybe-print-cause (stream condition &optional colon? at?)
   "Print the condition that caused CONDITION to be signaled (if any)
