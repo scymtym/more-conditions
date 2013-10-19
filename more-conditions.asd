@@ -70,8 +70,9 @@
   :version     #.(version/string)
   :license     "LLGPLv3; see COPYING file for details."
   :description "Unit tests for the more-conditions system."
-  :depends-on  ((:version :more-conditions #.(version/string))
-                (:version :lift            "1.7.1"))
+  :depends-on  ((:version :let-plus        "0.2")
+                (:version :more-conditions #.(version/string))
+                (:version :fiveam          "1.1"))
   :encoding    :utf-8
   :components  ((:module     "test"
                  :serial     t
@@ -81,4 +82,4 @@
 
 (defmethod perform ((op        test-op)
                     (component (eql (find-system :more-conditions-test))))
-  (funcall (find-symbol "RUN-TESTS" :lift) :config :generic))
+  (uiop:symbol-call '#:more-conditions.test "RUN-TESTS"))

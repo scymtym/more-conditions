@@ -6,117 +6,98 @@
 
 (cl:in-package #:more-conditions.test)
 
-(deftestsuite conditions-root (root)
+(in-suite :more-conditions)
+
+(define-condition foo-error (error
+                             chainable-condition)
   ()
-  (:documentation
-   "Root test suite for conditions and condition-related helper
-    functions provided by the more-conditions system."))
+  (:report
+   (lambda (condition stream)
+     (format stream "Foo-error ~
+                     occurred.~/more-conditions:maybe-print-cause/"
+             condition))))
 
-(deftestsuite maybe-print-cause-root (conditions-root)
+(test maybe-print-cause.print
+  "Test printing condition instances using the `maybe-print-cause'
+   helper function."
+
+  (mapc (lambda+ ((initargs expected))
+          (is (string= expected
+                       (princ-to-string
+                        (apply #'make-condition 'foo-error initargs)))))
+
+        `((()
+           "Foo-error occurred.")
+          ((:cause ,(make-condition 'simple-error
+                                    :format-control "The number was ~S."
+                                    :format-arguments '(1)))
+           "Foo-error occurred. Caused by:
+> The number was 1."))))
+
+(define-condition simple-foo-error (simple-error)
   ()
-  (:setup
-   ;; Without eval, causes failed aver in SBCL.
-   (eval
-    `(define-condition foo-error (error
-                                  chainable-condition)
-       ()
-       (:report
-        (lambda (condition stream)
-          (format stream "Foo-error occurred.~/more-conditions:maybe-print-cause/"
-                  condition))))))
-  (:documentation
-   "Test suite for the `maybe-print-cause' helper function."))
+  (:report
+   (lambda (condition stream)
+     (format stream "Foo-error ~
+                     occurred~/more-conditions:maybe-print-explanation/"
+             condition))))
 
-(addtest (maybe-print-cause-root
-          :documentation
-          "Test printing condition instances using the
-           `maybe-print-cause' helper function.")
-  print
+(test maybe-print-explanation.print
+  "Test printing condition instances using the
+   `maybe-print-explanation' helper function."
 
-  (ensure-cases (initargs expected)
-      `((nil
-         "Foo-error occurred.")
-        ((:cause ,(make-condition 'simple-error
-                                  :format-control "The number was ~S."
-                                  :format-arguments '(1)))
-         "Foo-error occurred. Caused by:
-> The number was 1."))
+  (mapc
+   (lambda+ ((initargs expected))
+     (is (string= expected
+                  (princ-to-string
+                   (apply #'make-condition 'simple-foo-error initargs)))))
 
-    (ensure-same (princ-to-string
-                  (apply #'make-condition 'foo-error initargs))
-                 expected
-                 :test #'string=)))
-
-(deftestsuite maybe-print-explanation-root (conditions-root)
-  ()
-  (:setup
-   ;; Without eval, causes failed aver in SBCL.
-   (eval
-    `(define-condition simple-foo-error (simple-error)
-       ()
-       (:report
-        (lambda (condition stream)
-          (format stream "Foo-error occurred~/more-conditions:maybe-print-explanation/"
-                  condition))))))
-  (:documentation
-   "Test suite for the `maybe-print-explanation' helper function."))
-
-(addtest (maybe-print-explanation-root
-          :documentation
-          "Test printing condition instances using the
-           `maybe-print-explanation' helper function.")
-  print
-
-  (ensure-cases (initargs expected)
-      '((nil
-         "Foo-error occurred.")
-        ((:format-control   "the number was ~S."
-          :format-arguments (1))
-         "Foo-error occurred: the number was 1."))
-
-    (ensure-same (princ-to-string
-                  (apply #'make-condition 'simple-foo-error initargs))
-                 expected
-                 :test #'string=)))
+   '(;; No format-control.
+     (()
+      "Foo-error occurred.")
+     ;; With format-control.
+     ((:format-control   "the number was ~S."
+       :format-arguments (1))
+      "Foo-error occurred: the number was 1."))))
 
 ;;; Program error conditions
 
 (defmacro define-condition-suite ((name &key (constructor name))
                                   &body cases)
-  (let ((suite-name (format-symbol *package* "~A-ROOT" name)))
-   `(progn
-      (deftestsuite ,suite-name (conditions-root)
-        ()
-        (:documentation
+  (let ((suite-name (make-keyword name)))
+    `(progn
+       (def-suite ,suite-name
+         :in :more-conditions
+         :description
          ,(format nil "Unit tests for the `~(~A~)' condition class."
-                  name)))
+                  name))
+       (in-suite ,suite-name)
 
-      (addtest (,suite-name
-                :documentation
-                ,(format nil "Test printing instances of the `~(~A~)' condition class"
-                         name))
-        construct-and-print/make-condition
+       (test construct-and-print/make-condition
+         ,(format nil "Test printing instances of the `~(~A~)' condition class"
+                  name)
 
-        (ensure-cases (initargs constructor-args expected) (list ,@cases)
-          (ensure-same (princ-to-string (apply #'make-condition ',name initargs))
-                       expected
-                       :test #'string=)))
+         (mapc (lambda+ ((initargs constructor-args expected))
+                 (declare (ignore constructor-args))
+                 (is (string= expected
+                              (princ-to-string
+                               (apply #'make-condition ',name initargs)))))
+               (list ,@cases)))
 
-      ,@(when (fboundp constructor)
-          `((addtest (,suite-name
-                      :documentation
-                      ,(format nil "Test printing instances of the `~(~A~)' condition class"
-                               name))
-              construct-and-print/constructor
+       ,@(when (fboundp constructor)
+           `((test construct-and-print/constructor
+               ,(format nil "Test printing instances of the `~(~A~)' condition class"
+                        name)
 
-              (ensure-cases (initargs constructor-args expected) (list ,@cases)
-                (unless (eq constructor-args :skip)
-                  (ensure-same (handler-case
-                                   (apply #',constructor constructor-args)
-                                 (,name (condition)
-                                   (princ-to-string condition)))
-                               expected
-                               :test #'string=)))))))))
+               (mapc (lambda+ ((initargs constructor-args expected))
+                       (declare (ignore initargs))
+                       (unless (eq constructor-args :skip)
+                         (is (string= expected
+                                      (handler-case
+                                          (apply #',constructor constructor-args)
+                                        (,name (condition)
+                                          (princ-to-string condition)))))))
+                     (list ,@cases))))))))
 
 (define-condition-suite (missing-required-argument)
   '((:parameter :foo)
@@ -231,7 +212,8 @@ See also:
   ()
   (:report (lambda (condition stream)
              (let ((*print-references* nil))
-               (format stream "Mock Error.~/more-conditions:maybe-print-cause/"
+               (format stream "Mock Error.~
+                               ~/more-conditions:maybe-print-cause/"
                        condition)))))
 
 (define-condition-suite (mock-error/reference-condition)

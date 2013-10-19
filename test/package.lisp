@@ -8,12 +8,13 @@
   (:use
    #:cl
    #:alexandria
-   #:lift
+   #:let-plus
+   #:fiveam
 
    #:more-conditions)
 
   (:export
-   #:root)
+   #:run-tests)
 
   (:documentation
    "This package contains unit tests for the more-conditions
@@ -21,7 +22,10 @@
 
 (cl:in-package #:more-conditions.test)
 
-(deftestsuite root ()
-  ()
-  (:documentation
-   "Root unit test suite for the more-conditions system."))
+(def-suite :more-conditions
+  :description
+  "Unit test suite for the more-conditions system.")
+
+(defun run-tests ()
+  "Run tests of the more-conditions system."
+  (run! :more-conditions))
