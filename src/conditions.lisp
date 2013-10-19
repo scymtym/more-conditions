@@ -8,20 +8,6 @@
 
 ;;; Generic condition utilities
 
-(defgeneric cause (condition)
-  (:method ((condition condition))
-    nil)
-  (:documentation
-   "Return the condition that was signaled and caused CONDITION to be
-    signaled."))
-
-(defgeneric root-cause (condition)
-  (:method ((condition condition))
-    condition)
-  (:documentation
-   "Return the condition that was originally signaled and eventually
-    caused CONDITION to be signaled."))
-
 (define-condition chainable-condition (condition)
   ((cause :initarg  :cause
           :type     (or null condition)
@@ -40,6 +26,16 @@
   (if-let ((cause (cause condition)))
     (root-cause cause)
     condition))
+
+(defmethod condition-references :around ((condition chainable-condition))
+  ;; Merge references associated to CONDITION with those associated to
+  ;; the transitive causes of CONDITION.
+  (remove-duplicates
+   (append (when-let ((cause (cause condition)))
+             (condition-references cause))
+           (call-next-method))
+   :test     #'equal
+   :from-end t))
 
 (defun maybe-print-cause (stream condition &optional colon? at?)
   "Print the condition that caused CONDITION to be signaled (if any)
@@ -212,26 +208,6 @@
     (format stream "~A, ~{~A~^ » ~}~@[ <~A>~]"
             document (ensure-list part) link)))
 
-(defgeneric condition-references (condition)
-  (:documentation
-   "Return a list of references (of type `reference-spec') which are
-    associated to CONDITION."))
-
-(defmethod condition-references ((condition t))
-  "Return nil since arbitrary objects do not have references
-   associated to them."
-  nil)
-
-(defmethod condition-references :around ((condition chainable-condition))
-  "Merge references associated to CONDITION with those associated to
-   the transitive causes of CONDITION."
-  (remove-duplicates
-   (append (when-let ((cause (cause condition)))
-             (condition-references cause))
-           (call-next-method))
-   :test     #'equal
-   :from-end t))
-
 ;; Note: based on identically named class in SBCL's
 ;; src/code/condition.lisp
 (define-condition reference-condition (condition)
@@ -256,13 +232,6 @@
             (list (condition-references object)))))
 
 ;;; Progress conditions
-
-(defgeneric progress-condition-message (condition)
-  (:documentation
-   "Return a string describing CONDITION or NULL"))
-
-(defmethod progress-condition-message ((condition condition))
-  nil)
 
 (define-condition progress-condition (condition)
   ((operation :initarg  :operation

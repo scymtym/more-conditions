@@ -56,6 +56,7 @@
                  :components ((:file       "package")
                               (:file       "types")
                               (:file       "variables")
+                              (:file       "protocol")
                               (:file       "conditions")
                               (:file       "macros")))
 
