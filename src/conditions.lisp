@@ -98,7 +98,8 @@ parameter."))
   (error 'missing-required-argument
          :parameter parameter))
 
-(define-condition incompatible-arguments (program-error)
+(define-condition incompatible-arguments (program-error
+                                          chainable-condition)
   ((parameters :initarg  :parameters
                :type     list
                :reader   incompatible-arguments-parameters
@@ -114,10 +115,11 @@ have been supplied.")
    (lambda (condition stream)
      (let ((parameters (incompatible-arguments-parameters condition))
            (values     (incompatible-arguments-values     condition)))
-      (format stream "~@<~:[No arguments are~;~:*The combination of ~
-                      arguments~&~/more-conditions:print-arguments/~2&is~] ~
-                      invalid.~:>"
-              (when parameters (list parameters values))))))
+       (format stream "~@<~:[No arguments are~;~:*The combination of ~
+                       arguments~&~/more-conditions:print-arguments/~2&is~] ~
+                       invalid.~/more-conditions:maybe-print-cause/~:>"
+               (when parameters (list parameters values))
+               condition))))
   (:documentation
    "This error is signaled when an incompatible combination of
 arguments is supplied."))
@@ -179,9 +181,11 @@ is not supplied."))
            (values     (incompatible-arguments-values     condition)))
        (format stream "~@<~:[No initargs are~;~:*The combination of ~
                        initargs~&~/more-conditions:print-arguments/~2&is~] ~
-                       invalid for class ~S.~:>"
+                       invalid for class ~S.~
+                       ~/more-conditions:maybe-print-cause/~:>"
               (when parameters (list parameters values))
-              (initarg-error-class condition)))))
+              (initarg-error-class condition)
+              condition))))
   (:documentation
    "This error is signaled when incompatible initargs are supplied."))
 

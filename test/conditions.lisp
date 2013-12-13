@@ -110,12 +110,13 @@ functions provided by the more-conditions system."))
               construct-and-print/constructor
 
               (ensure-cases (initargs constructor-args expected) (list ,@cases)
-                (ensure-same (handler-case
-                                 (apply #',constructor constructor-args)
-                               (,name (condition)
-                                 (princ-to-string condition)))
-                             expected
-                             :test #'string=))))))))
+                (unless (eq constructor-args :skip)
+                  (ensure-same (handler-case
+                                   (apply #',constructor constructor-args)
+                                 (,name (condition)
+                                   (princ-to-string condition)))
+                               expected
+                               :test #'string=)))))))))
 
 (define-condition-suite (missing-required-argument)
   '((:parameter :foo)
@@ -140,7 +141,19 @@ is invalid.")
   :FOO    1
   :BARBAR 2
 
-is invalid."))
+is invalid.")
+  `((:parameters (:foo)
+     :values     (1)
+     :cause      ,(make-instance 'simple-error
+                                 :format-control "foo"))
+    :skip
+    "The combination of arguments
+
+  :FOO 1
+
+is invalid.
+Caused by:
+> foo"))
 
 (define-condition-suite (initarg-error)
   '((:class :foo)
@@ -170,7 +183,20 @@ is invalid for class :FOO.")
   :BAR    1
   :BAZBAZ 2
 
-is invalid for class :FOO."))
+is invalid for class :FOO.")
+  `((:class      :foo
+     :parameters (:bar)
+     :values     (1)
+     :cause      ,(make-instance 'simple-error
+                                 :format-control "foo"))
+    :skip
+    "The combination of initargs
+
+  :BAR 1
+
+is invalid for class :FOO.
+Caused by:
+> foo"))
 
 ;;; `reference-condition'
 
