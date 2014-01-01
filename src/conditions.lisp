@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -80,6 +80,8 @@
               :documentation
               "The parameter for which a value should have been
                supplied."))
+  (:default-initargs
+   :parameter (missing-required-initarg 'missing-required-argument :parameter))
   (:report
    (lambda (condition stream)
      (format stream "~@<No value has been supplied for the required ~
@@ -107,6 +109,9 @@
                :reader   incompatible-arguments-values
                :documentation
                "A list of the incompatible values."))
+  (:default-initargs
+   :parameters (missing-required-initarg 'incompatible-arguments :parameters)
+   :values     (missing-required-initarg 'incompatible-arguments :values))
   (:report
    (lambda (condition stream)
      (let ((parameters (incompatible-arguments-parameters condition))
@@ -141,6 +146,8 @@
           :reader   initarg-error-class
           :documentation
           "The class for which the initarg error occurred."))
+  (:default-initargs
+   :class (missing-required-initarg 'initarg-error :class))
   (:report
    (lambda (condition stream)
      (format stream "~@<Invalid initargs have been supplied for class ~
