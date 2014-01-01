@@ -42,8 +42,14 @@
    onto STREAM."
   (declare (ignore colon? at?))
   (let ((*print-references* (eq *print-references* :force)))
-    (format stream "~@[ ~_Caused by:~&~@<> ~@;~A~@:>~]"
-            (cause condition))))
+    ;; TODO can this be done nicer/portably?
+    #+sbcl (if (sb-pretty:pretty-stream-p stream)
+               (format stream "~@[ ~:_Caused by:~@:_~@<> ~@;~A~@:>~]"
+                       (cause condition))
+               (format stream "~@[ Caused by:~&~@<> ~@;~A~@:>~]"
+                       (cause condition)))
+    #-sbcl (format stream "~@[ ~:_Caused by:~&~@<> ~@;~A~@:>~]"
+                   (cause condition))))
 
 (defun maybe-print-explanation (stream condition &optional colon? at?)
   "Format the message contained in the `simple-condition' CONDITION on

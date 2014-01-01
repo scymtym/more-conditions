@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Unit tests for conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -8,8 +8,8 @@
 
 (in-suite :more-conditions)
 
-(define-condition foo-error (error
-                             chainable-condition)
+(define-condition maybe-print-cause.print.error1 (error
+                                                  chainable-condition)
   ()
   (:report
    (lambda (condition stream)
@@ -17,22 +17,54 @@
                      occurred.~/more-conditions:maybe-print-cause/"
              condition))))
 
+(define-condition maybe-print-cause.print.error2 (error
+                                                  chainable-condition)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Error occurred.~@:_~
+                     ~2@T~@<Foo.~/more-conditions:maybe-print-cause/~:>~@:>"
+             condition))))
+
 (test maybe-print-cause.print
   "Test printing condition instances using the `maybe-print-cause'
    helper function."
 
-  (mapc (lambda+ ((initargs expected))
+  (mapc (lambda+ ((condition initargs expected))
           (is (string= expected
                        (princ-to-string
-                        (apply #'make-condition 'foo-error initargs)))))
+                        (apply #'make-condition condition initargs)))))
 
-        `((()
+        `((maybe-print-cause.print.error1
+           ()
            "Foo-error occurred.")
-          ((:cause ,(make-condition 'simple-error
-                                    :format-control "The number was ~S."
-                                    :format-arguments '(1)))
+          ;; Cause is present. Not printing within a logical block =>
+          ;; cause description should be printed on a fresh line but
+          ;; without indentation.
+          (maybe-print-cause.print.error1
+           (:cause ,(make-condition
+                     'simple-error
+                     :format-control   "~@<The number was~@:_~S.~@:>"
+                     :format-arguments '(1)))
            "Foo-error occurred. Caused by:
-> The number was 1."))))
+> The number was
+> 1.")
+          ;; Cause is present. Printing within a logical block =>
+          ;; cause description should be printed on a fresh line and
+          ;; with current indentation of the logical block.
+          (maybe-print-cause.print.error2
+           (:cause ,(make-condition
+                     'simple-error
+                     :format-control   "~@<The number was~@:_~S.~@:>"
+                     :format-arguments '(1)))
+           #+sbcl "Error occurred.
+  Foo. Caused by:
+  > The number was
+  > 1."
+           #-sbcl "Error occurred.
+  Foo. Caused by:
+> The number was
+> 1."))))
 
 (define-condition simple-foo-error (simple-error)
   ()
