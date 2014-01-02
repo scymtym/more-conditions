@@ -240,7 +240,17 @@ See also:
 See also:
   FOO, bar
   FOO, bar » baz
-  FOO, bar » baz <http://fez.org>"))
+  FOO, bar » baz <http://fez.org>")
+  ;; Test computed references.
+  `((:references ((:bar "baz")
+                  ,(lambda (condition)
+                     (declare (ignore condition))
+                     '((:foo "bar" "http://fez.org")))))
+    ()
+    "Reference Error.
+See also:
+  BAR, baz
+  FOO, bar <http://fez.org>"))
 
 (define-condition mock-error/reference-condition (error
                                                   reference-condition

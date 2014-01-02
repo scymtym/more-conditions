@@ -29,6 +29,14 @@
     ;; Return nil since arbitrary objects do not have references
     ;; associated to them.
     nil)
+  (:method :around ((condition t))
+    ;; When references of CONDITION are specified in form of
+    ;; functions, resolve them by calling the functions.
+    (mappend (lambda (spec)
+               (etypecase spec
+                 (function       (funcall spec condition))
+                 (reference-spec (list spec))))
+             (call-next-method)))
   (:documentation
    "Return a list of references (of type `reference-spec') which are
     associated to CONDITION."))

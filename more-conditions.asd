@@ -1,6 +1,6 @@
 ;;;; more-conditions.asd --- System definition for more-conditions.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -23,7 +23,7 @@
 (defparameter +version-minor+ 4
   "Minor component of version number.")
 
-(defparameter +version-revision+ 2
+(defparameter +version-revision+ 3
   "Revision component of version number.")
 
 (defun version/list ()
