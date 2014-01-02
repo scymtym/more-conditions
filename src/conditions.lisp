@@ -214,7 +214,8 @@
 (defun print-reference (stream spec &optional at? colon?)
   "Print reference SPEC onto STREAM.
    AT? and COLON? are ignored."
-  (declare (ignore at? colon?))
+  (declare (ignore at? colon?)
+           (type reference-spec spec))
   (with-accessors ((document reference-document)
                    (part     reference-part)
                    (link     reference-link)) spec

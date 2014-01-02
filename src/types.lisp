@@ -1,6 +1,6 @@
 ;;;; types.lisp --- Types used in the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2013 Jan Moringen
+;;;; Copyright (C) 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -15,10 +15,11 @@
 
    where DOCUMENT is a keyword, PART is a string or list of strings
    and LINK, if present, is a string."
-  '(cons keyword                      ; document
-         (cons (or string list)       ; part
-               (cons (or null string) ; link
-                     null))))
+  '(cons keyword                              ; document
+         (cons (or string list #|of string|#) ; part
+               (or null                       ; maybe link
+                   (cons (or null string)
+                         null)))))
 
 (defun reference-document (spec)
   "Return the document of SPEC."
