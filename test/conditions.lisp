@@ -96,7 +96,11 @@
 
 (defmacro define-condition-suite ((name &key (constructor name))
                                   &body cases)
-  (let ((suite-name (make-keyword name)))
+  (let ((suite-name            (make-keyword name))
+        (condition-case-name   (symbolicate
+                                name '#:.construct-and-print/make-condition))
+        (constructor-case-name (symbolicate
+                                name '#:.construct-and-print/constructor)))
     `(progn
        (def-suite ,suite-name
          :in :more-conditions
@@ -105,7 +109,7 @@
                   name))
        (in-suite ,suite-name)
 
-       (test construct-and-print/make-condition
+       (test ,condition-case-name
          ,(format nil "Test printing instances of the `~(~A~)' condition class"
                   name)
 
@@ -117,7 +121,7 @@
                (list ,@cases)))
 
        ,@(when (fboundp constructor)
-           `((test construct-and-print/constructor
+           `((test ,constructor-case-name
                ,(format nil "Test printing instances of the `~(~A~)' condition class"
                         name)
 
