@@ -243,9 +243,18 @@
   (when (and (not *print-escape*) (not *print-readably*)
              *print-references*
              (condition-references object))
-    (format stream "~&See also:~%~<  ~@;~
-                    ~{~/more-conditions:print-reference/~^~%~}~:>"
-            (list (condition-references object)))))
+    ;; TODO can this be done nicer/portably?
+    #+sbcl (if (sb-pretty:pretty-stream-p stream)
+               (format stream " ~@:_See also:~
+                               ~@:_~2@T~
+                               ~<~{~/more-conditions:print-reference/~^~@:_~}~:>"
+                       (list (condition-references object)))
+               (format stream "~&See also:~&~<  ~@;~
+                               ~{~/more-conditions:print-reference/~^~@:_~}~:>"
+                       (list (condition-references object))))
+    #-sbcl (format stream " ~:_See also:~&~<  ~@;~
+                           ~{~/more-conditions:print-reference/~^~@:_~}~:>"
+                   (list (condition-references object)))))
 
 ;;; Progress conditions
 

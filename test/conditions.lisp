@@ -278,6 +278,34 @@ See also:
   BAR, fez <http://whoop.org>
   FEZ, whiz"))
 
+(test reference-condition.print/logical-block
+  "Test printing of `reference-condition' within a logical block."
+
+  (is (string=
+       #+sbcl "| Mock Error. Caused by:
+| > Reference Error.
+| See also:
+|   FOO, bar
+|   FOO, baz
+|   BAR, fez <http://whoop.org>
+|   FEZ, whiz"
+       #-sbcl "| Mock Error. Caused by:
+| > Reference Error. See also:
+|   FOO, bar
+|   FOO, baz
+|   BAR, fez <http://whoop.org>
+|   FEZ, whiz"
+       (format nil "~@<| ~@;~A~:>"
+               (make-condition
+                'mock-error/reference-condition
+                :references '((:foo "bar")
+                              (:fez "whiz"))
+                :cause      (make-condition
+                             'reference-error
+                             :references '((:foo "bar")
+                                           (:foo "baz")
+                                           (:bar "fez" "http://whoop.org"))))))))
+
 ;;; Progress conditions
 
 (define-condition-suite (progress-condition :constructor progress)
