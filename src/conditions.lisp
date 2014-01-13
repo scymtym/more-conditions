@@ -221,7 +221,7 @@
   (with-accessors ((document reference-document)
                    (part     reference-part)
                    (link     reference-link)) spec
-    (format stream "~A, ~{~A~^ » ~}~@[ <~A>~]"
+    (format stream "~A, ~:_~{~A~^ » ~}~@[ ~:_<~A>~]"
             document (ensure-list part) link)))
 
 ;; Note: based on identically named class in SBCL's
