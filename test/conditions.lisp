@@ -257,10 +257,9 @@ See also:
                                                   chainable-condition)
   ()
   (:report (lambda (condition stream)
-             (let ((*print-references* nil))
-               (format stream "Mock Error.~
-                               ~/more-conditions:maybe-print-cause/"
-                       condition)))))
+             (format stream "Mock Error.~
+                             ~/more-conditions:maybe-print-cause/"
+                     condition))))
 
 (define-condition-suite (mock-error/reference-condition)
   `((:references ((:foo "bar")
