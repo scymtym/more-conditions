@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Unit tests for the macros provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,7 +28,8 @@
 
   (let ((source (make-condition 'source-condition)))
     (handler-case
-        (with-condition-translation (((error target-condition/no-cause)))
+        (with-condition-translation (((error target-condition/no-cause
+                                       :cause-initarg nil)))
           (error source))
       (target-condition/no-cause (condition)
         (is (eq :default (target-condition-slot condition)))))))
