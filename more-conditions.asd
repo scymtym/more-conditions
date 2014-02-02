@@ -82,4 +82,4 @@
 
 (defmethod perform ((op        test-op)
                     (component (eql (find-system :more-conditions-test))))
-  (funcall (read-from-string "MORE-CONDITIONS.TEST:RUN-TESTS")))
+  (funcall (read-from-string "more-conditions.test:run-tests")))
