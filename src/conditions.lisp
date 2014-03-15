@@ -294,6 +294,9 @@
 (define-condition simple-progress-condition (progress-condition
                                              simple-condition)
   ()
+  #-sbcl (:default-initargs
+          :format-control   nil
+          :format-arguments '())
   (:documentation
    "Like `progress-condition' but supports format control and format
     arguments to produce a report to go along with the raw progress

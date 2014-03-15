@@ -85,7 +85,7 @@
                    (apply #'make-condition 'simple-foo-error initargs)))))
 
    '(;; No format-control.
-     (()
+     #+sbcl (()
       "Foo-error occurred.")
      ;; With format-control.
      ((:format-control   "the number was ~S."
