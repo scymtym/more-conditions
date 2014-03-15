@@ -193,13 +193,22 @@
     ;; `progress'
     (test-case (2 :foo '(1 2)) (progress))
     (test-case (2 :foo '(1 2)) (progress "bar"))
+    (test-case (2 :foo '(1 2)) (progress (formatter "bar")))
     (test-case (2 :foo '(1 2)) (progress "bar: ~A" :baz))
+    (test-case (2 :foo '(1 2)) (progress (formatter "bar: ~A") :baz))
     (test-case (2 :foo '(1 2)) (progress 'simple-progress-condition))
     (test-case (2 :foo '(1 2))
       (progress 'simple-progress-condition :format-control "bar"))
     (test-case (2 :foo '(1 2))
       (progress 'simple-progress-condition
+                :format-control (formatter "bar")))
+    (test-case (2 :foo '(1 2))
+      (progress 'simple-progress-condition
                 :format-control   "bar: ~A"
+                :format-arguments '(:baz)))
+    (test-case (2 :foo '(1 2))
+      (progress 'simple-progress-condition
+                :format-control   (formatter "bar: ~A")
                 :format-arguments '(:baz)))
 
     ;; `progressing'
@@ -208,7 +217,13 @@
     (test-case (3 :foo '(1 2))
       (mapc (progressing #'1+ :foo "bar") sequence))
     (test-case (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo (formatter "bar")) sequence))
+    (test-case (3 :foo '(1 2))
       (mapc (progressing #'1+ :foo "bar: ~A" :baz) sequence))
+    (test-case (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo (formatter "bar: ~A") :baz) sequence))
+    (test-case (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo "bar: ~D") sequence))
     (test-case (3 :foo '(1 2))
       (mapc (progressing #'1+ :foo 'simple-progress-condition)
             sequence))
@@ -218,6 +233,15 @@
             sequence))
     (test-case (3 :foo '(1 2))
       (mapc (progressing #'1+ :foo 'simple-progress-condition
+                              :format-control (formatter "bar"))
+            sequence))
+    (test-case (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo 'simple-progress-condition
                               :format-control   "bar: ~A"
+                              :format-arguments '(:baz))
+            sequence))
+    (test-case (3 :foo '(1 2))
+      (mapc (progressing #'1+ :foo 'simple-progress-condition
+                              :format-control   (formatter "bar: ~A")
                               :format-arguments '(:baz))
             sequence))))

@@ -321,19 +321,21 @@
    As with `cl:signal', `cl:error' and `cl:warn',
    FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
    either specify a condition class and initargs or a report format
-   control string and format arguments."
+   control string or function with format arguments."
   (declare (type progress-designator progress))
-  (if (stringp format-control-or-condition-class)
-      (signal 'simple-progress-condition
-              :operation        operation
-              :progress         progress
-              :format-control   format-control-or-condition-class
-              :format-arguments format-arguments-or-initargs)
-      (apply #'signal (or format-control-or-condition-class
-                          'progress-condition)
-             :operation operation
-             :progress  progress
-             format-arguments-or-initargs)))
+  (typecase format-control-or-condition-class
+    ((or string function) ; assume formatter when function
+     (signal 'simple-progress-condition
+             :operation        operation
+             :progress         progress
+             :format-control   format-control-or-condition-class
+             :format-arguments format-arguments-or-initargs))
+    (t
+     (apply #'signal (or format-control-or-condition-class
+                         'progress-condition)
+            :operation operation
+            :progress  progress
+            format-arguments-or-initargs))))
 
 (defun progressing (function operation
                     &optional
@@ -345,7 +347,7 @@
    As with `cl:signal', `cl:error' and `cl:warn',
    FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
    either specify a condition class and initargs or a report format
-   control string and format arguments. However, if
+   control string or function with format arguments. However, if
    FORMAT-CONTROL-OR-CONDITION-CLASS is nil, a format string which
    prints all arguments passed to FUNCTION is used.
 
@@ -354,15 +356,23 @@
      (let ((items '(1 2 3 4 5)))
        (with-sequence-progress (:foo items)
          (mapcar (progressing #'1+ :foo \"Frobbing\") items)))"
-  (if format-control-or-condition-class
-      (lambda (&rest args)
-        (apply #'progress operation nil
-               format-control-or-condition-class
-               format-arguments-or-initargs)
-        (apply function args))
-      (lambda (&rest args)
-        (apply #'progress operation nil "~@{~A~^ ~}" args)
-        (apply function args))))
+  (typecase format-control-or-condition-class
+    (null
+     (lambda (&rest args)
+       (apply #'progress operation nil "~@{~A~^ ~}" args)
+       (apply function args)))
+    ((or function string) ; assume formatter when function
+     (lambda (&rest args)
+       (apply #'progress operation nil
+              format-control-or-condition-class
+              (append format-arguments-or-initargs args))
+       (apply function args)))
+    (t
+     (lambda (&rest args)
+       (apply #'progress operation nil
+              format-control-or-condition-class
+              format-arguments-or-initargs)
+       (apply function args)))))
 
 ;;; Utility functions
 
