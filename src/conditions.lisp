@@ -252,7 +252,7 @@
                (format stream "~&See also:~&~<  ~@;~
                                ~{~/more-conditions:print-reference/~^~@:_~}~:>"
                        (list (condition-references object))))
-    #-sbcl (format stream " ~:_See also:~&~<  ~@;~
+    #-sbcl (format stream " ~@:_See also:~&~<  ~@;~
                            ~{~/more-conditions:print-reference/~^~@:_~}~:>"
                    (list (condition-references object)))))
 
@@ -375,7 +375,7 @@
            (reduce #'max parameters
                    :key           (compose #'length #'prin1-to-string)
                    :initial-value 0)))
-      (format stream "~:{~,,1<~%~2@T~VS~@;~S~>~}"
+      (format stream "~:{~,,1<~%~2@T~VS~;~S~>~}"
               (mapcar #'list
                       (circular-list max-name-length) parameters values)))))
 
