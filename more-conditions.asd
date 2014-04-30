@@ -50,7 +50,7 @@
                      In addition, there is support for translating
                      conditions at layer boundaries in larger systems."
   :depends-on  (:alexandria
-                (:version :closer-mop "0.61"))
+                (:version :closer-mop "1.0.0"))
   :encoding    :utf-8
   :components  ((:module     "src"
                  :serial     t
