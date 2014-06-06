@@ -1,6 +1,6 @@
 ;;;; macros.lisp --- Macros provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -174,10 +174,10 @@
   (once-only (operation)
     `(unwind-protect
           (progn
-            (progress ,operation 0 ,format-control-or-condition-class
-                      ,@format-arguments-or-initargs)
+            (%progress ,operation 0 ,format-control-or-condition-class
+                       ,@format-arguments-or-initargs)
             ,@body)
-       (progress ,operation t))))
+       (%progress ,operation t))))
 
 (defmacro with-sequence-progress ((operation sequence) &body body)
   "Signal progress conditions for OPERATION on SEQUENCE during the
@@ -206,7 +206,7 @@
                        (/ (1- (incf i)) ,length))
                      (progress (&optional format-control-or-condition-class
                                 &rest format-arguments-or-initargs)
-                       (apply #'progress ,operation nil
+                       (apply #'%progress ,operation nil
                               format-control-or-condition-class
                               format-arguments-or-initargs)))
                 (handler-bind
@@ -216,4 +216,4 @@
                            (setf (progress-condition-progress condition)
                                  (compute-progress))))))
                   ,@body)))
-         (progress ,operation t)))))
+         (%progress ,operation t)))))

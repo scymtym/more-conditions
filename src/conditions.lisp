@@ -315,16 +315,9 @@
   (unless *print-escape*
     (maybe-print-explanation stream object nil t)))
 
-(defun progress (&optional operation progress
-                 format-control-or-condition-class
-                 &rest format-arguments-or-initargs)
-  "Signal a progress condition indicating completion status PROGRESS
-   for OPERATION.
-
-   As with `cl:signal', `cl:error' and `cl:warn',
-   FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
-   either specify a condition class and initargs or a report format
-   control string or function with format arguments."
+(defun %progress (&optional operation progress
+                  format-control-or-condition-class
+                  &rest format-arguments-or-initargs)
   (declare (type progress-designator progress))
   (typecase format-control-or-condition-class
     ((or string function) ; assume formatter when function
@@ -339,6 +332,20 @@
             :operation operation
             :progress  progress
             format-arguments-or-initargs))))
+
+(defun progress (&optional operation progress
+                 format-control-or-condition-class
+                 &rest format-arguments-or-initargs)
+  "Signal a progress condition indicating completion status PROGRESS
+   for OPERATION.
+
+   As with `cl:signal', `cl:error' and `cl:warn',
+   FORMAT-CONTROL-OR-CONDITION-CLASS and FORMAT-ARGUMENTS-OR-INITARGS
+   either specify a condition class and initargs or a report format
+   control string or function with format arguments."
+  (declare (type progress-designator progress))
+  (apply #'%progress operation progress
+         format-control-or-condition-class format-arguments-or-initargs))
 
 (defun progressing (function operation
                     &optional
@@ -362,17 +369,17 @@
   (typecase format-control-or-condition-class
     (null
      (lambda (&rest args)
-       (apply #'progress operation nil "~@{~A~^ ~}" args)
+       (apply #'%progress operation nil "~@{~A~^ ~}" args)
        (apply function args)))
     ((or function string) ; assume formatter when function
      (lambda (&rest args)
-       (apply #'progress operation nil
+       (apply #'%progress operation nil
               format-control-or-condition-class
               (append format-arguments-or-initargs args))
        (apply function args)))
     (t
      (lambda (&rest args)
-       (apply #'progress operation nil
+       (apply #'%progress operation nil
               format-control-or-condition-class
               format-arguments-or-initargs)
        (apply function args)))))
