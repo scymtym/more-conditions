@@ -215,5 +215,6 @@
                          (unless (progress-condition-progress condition)
                            (setf (progress-condition-progress condition)
                                  (compute-progress))))))
+                  (%progress ,operation 0)
                   ,@body)))
          (%progress ,operation t)))))
