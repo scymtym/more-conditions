@@ -40,15 +40,20 @@
    MUFFLE? controls whether the original condition should be muffled
    after the translation has been performed. \(This is useful for
    `cl:warning's and generic `cl:condition's which would not get
-   handled by resignaling via e.g. `cl:warn')."
+   handled by resignaling via e.g. `cl:warn').
+
+   CHAIN-SAME-CLASS? controls whether conditions which already are
+   instances of TO-CONDITION should still be wrapped in a TO-CONDITION
+   instance. The default is false."
   (flet ((do-clause (clause)
            (destructuring-bind
                  ((from-condition to-condition
                    &key
-                   (var            (gensym) var-supplied?)
-                   (cause-initarg  :cause)
-                   (signal-via     'error)
-                   (muffle?        (subtypep from-condition 'warning)))
+                   (var              (gensym) var-supplied?)
+                   (cause-initarg    :cause)
+                   (signal-via       'error)
+                   (muffle?          (subtypep from-condition 'warning))
+                   chain-same-class?)
                   &body initargs)
                clause
              (when var-supplied?
@@ -58,7 +63,9 @@
              (check-type cause-initarg  symbol)
              (check-type signal-via     symbol)
 
-             `((and ,from-condition (not ,to-condition))
+             `((and ,from-condition
+                    ,@(unless chain-same-class?
+                        `((not ,to-condition))))
                (lambda (,var)
                  ,@(unless (or var-supplied? cause-initarg muffle?)
                      `((declare (ignore ,var))))

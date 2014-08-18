@@ -47,6 +47,41 @@
         (is (eq source   (cause                 condition)))
         (is (eq source   (root-cause            condition)))))))
 
+(test with-condition-translation.smoke/chain-same-class
+  "Smoke test for chaining causing conditions of the same class in
+   nested translations."
+
+  (let ((source (make-condition 'source-condition)))
+    ;; Without chaining causing conditions of the same class (the
+    ;; default), SOURCE should be wrapped in one
+    ;; `target-condition/cause' condition.
+    (handler-case
+        (with-condition-translation (((error target-condition/cause
+                                             :chain-same-class? nil)))
+          (with-condition-translation (((error target-condition/cause)))
+            (error source)))
+      (target-condition/cause (condition)
+        (is (eq :default (target-condition-slot condition)))
+        (is (eq source   (cause                 condition)))
+        (is (eq source   (root-cause            condition)))))
+
+    ;; With chaining causing conditions of the same class, SOURCE
+    ;; should be wrapped in two `target-condition/cause' conditions.
+    (handler-case
+        (with-condition-translation (((error target-condition/cause
+                                       :chain-same-class? t)))
+          (with-condition-translation (((error target-condition/cause)))
+            (error source)))
+      (target-condition/cause (condition)
+        (is (eq :default (target-condition-slot condition)))
+        (is (eq :default (target-condition-slot (cause condition))))
+
+        (is (typep (cause condition) 'target-condition/cause))
+        (is (eq source   (cause                 (cause condition))))
+
+        (is (eq source   (root-cause            condition)))
+        (is (eq source   (root-cause            (cause condition))))))))
+
 (def-fixture with-mock-generic-function/foo ()
   (unwind-protect
        (progn
