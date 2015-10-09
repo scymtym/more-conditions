@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -10,7 +10,7 @@
 
 (define-condition chainable-condition (condition)
   ((cause :initarg  :cause
-          :type     (or null condition )
+          :type     (or null condition)
           :reader   cause
           :initform nil
           :documentation
