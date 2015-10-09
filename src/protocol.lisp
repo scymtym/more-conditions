@@ -1,6 +1,6 @@
 ;;;; protocol.lisp --- Protocol provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -63,9 +63,11 @@
     (multiple-value-bind (references references?)
         (default-initarg-value class :references)
       (if (or (not references?) (eq references :compute))
-          (append (direct-default-references class)
-                  (mappend #'default-references
-                           (closer-mop:class-direct-superclasses class)))
+          (remove-duplicates
+           (append (direct-default-references class)
+                   (mappend #'default-references
+                            (closer-mop:class-direct-superclasses class)))
+           :test #'equal :from-end t)
           references)))
   (:documentation
    "Return a list of references (of type `reference-spec') which are

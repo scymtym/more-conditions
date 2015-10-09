@@ -10,7 +10,7 @@
 
 (define-condition chainable-condition (condition)
   ((cause :initarg  :cause
-          :type     (or null condition)
+          :type     (or null condition )
           :reader   cause
           :initform nil
           :documentation
@@ -217,7 +217,7 @@
 ;; src/code/condition.lisp
 (define-condition reference-condition (condition)
   ((references :initarg  :references
-               :type     (or (eql :compute ) list #|of reference-spec|#)
+               :type     (or (eql :compute) list #|of reference-spec|#)
                :accessor condition-%references
                :initform :compute
                :documentation

@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Unit tests for conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014 Jan Moringen
+;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -316,14 +316,14 @@ See also:
   (:default-initargs
    :direct-references '((:super "super" "http://super.org"))))
 
-(define-condition reference-condition.inheritance.suberror
+(define-condition reference-condition.inheritance.suberror.1
     (reference-condition.inheritance.supererror)
   ()
   (:default-initargs
    :direct-references '((:sub "sub")))
   (:report "Mock Error."))
 
-(define-condition-suite (reference-condition.inheritance.suberror
+(define-condition-suite (reference-condition.inheritance.suberror.1
                          :repeat 2) ; because of caching
 
   ;; No initargs => :direct-references from transitive
@@ -341,20 +341,58 @@ See also:
 See also:
   NO-DEFAULTS, nodefaults"))
 
-(define-condition reference-condition.inheritance.supererror2
+(define-condition reference-condition.inheritance.supererror.1
+    (error reference-condition)
+  ()
+  (:default-initargs
+   :direct-references '((:super   "super")
+                        (:super.1 "super.1"))))
+
+(define-condition reference-condition.inheritance.supererror.2
+    (error reference-condition)
+  ()
+  (:default-initargs
+   :direct-references '((:super   "super")
+                        (:super.2 "super.2" "http://super.org"))))
+
+(define-condition reference-condition.inheritance.suberror.2
+    (reference-condition.inheritance.supererror.1
+     reference-condition.inheritance.supererror.2)
+  ()
+  (:report "Mock Error."))
+
+(define-condition-suite (reference-condition.inheritance.suberror.2
+                         :repeat 2) ; because of caching
+
+  ;; No initargs => :direct-references from transitive
+  ;; superclass-closure are collected and printed.
+  `(()
+    "Mock Error.
+See also:
+  SUPER, super
+  SUPER.1, super.1
+  SUPER.2, super.2 <http://super.org>")
+
+  ;; :references initarg overwrites all default references.
+  '((:references ((:no-defaults "nodefaults")))
+    "Mock Error.
+See also:
+  NO-DEFAULTS, nodefaults"))
+
+(define-condition reference-condition.inheritance.supererror.3
     (reference-condition.inheritance.super^2error)
   ()
   (:default-initargs
    :references :compute))
 
-(define-condition reference-condition.inheritance.suberror2
-    (reference-condition.inheritance.supererror2)
+(define-condition reference-condition.inheritance.suberror.3
+    (reference-condition.inheritance.supererror.3)
   ()
   (:default-initargs
    :direct-references '((:sub "sub")))
   (:report "Mock Error."))
 
-(define-condition-suite (reference-condition.inheritance.suberror2
+(define-condition-suite (reference-condition.inheritance.suberror.3
                          :repeat 2) ; because of caching
 
   ;; No initargs => :direct-references from transitive
@@ -380,7 +418,7 @@ See also:
                   (format nil "~@<| ~@;~A~:>"
                           (apply #'make-condition class initargs)))))
 
-   `((reference-condition.inheritance.suberror
+   `((reference-condition.inheritance.suberror.1
       (:references ((:foo "bar")
                     (:fez "whiz")))
       #+sbcl "| Mock Error.
