@@ -41,6 +41,10 @@
   =reference-condition= mixin. See [[*Embedding Documentation References
   in Conditions]] below.
 
+
+  #+ATTR_HTML: :alt "build status image" :title Build Status :align right
+  [[https://travis-ci.org/scymtym/more-conditions][https://travis-ci.org/scymtym/more-conditions.svg]]
+
 * Error Behaviors for Layered Systems
 ** Condition Translation at Layer Boundaries
    Assume some complex backend whose primary entry point is a =emit

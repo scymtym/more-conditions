@@ -1,6 +1,6 @@
 ;;;; package.lisp --- Package definition for unit tests of the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013 Jan Moringen
+;;;; Copyright (C) 2011, 2012, 2013, 2015 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -28,4 +28,7 @@
 
 (defun run-tests ()
   "Run tests of the more-conditions system."
-  (run! :more-conditions))
+  (let ((results (let ((*print-pretty* t))
+                   (run :more-conditions))))
+    (explain! results)
+    (results-status results)))
