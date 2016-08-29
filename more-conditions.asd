@@ -1,6 +1,6 @@
 ;;;; more-conditions.asd --- System definition for more-conditions.
 ;;;;
-;;;; Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2010-2016 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -73,7 +73,7 @@
   :description "Unit tests for the more-conditions system."
   :depends-on  ((:version :let-plus        "0.2")
                 (:version :more-conditions #.(version/string))
-                (:version :fiveam          "1.1"))
+                (:version :fiveam          "1.3"))
   :encoding    :utf-8
   :components  ((:module     "test"
                  :serial     t
