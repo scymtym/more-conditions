@@ -81,6 +81,6 @@
                               (:file       "conditions")
                               (:file       "macros")))))
 
-(defmethod perform ((op        test-op)
+(defmethod perform ((operation test-op)
                     (component (eql (find-system :more-conditions/test))))
   (funcall (read-from-string "more-conditions.test:run-tests")))
