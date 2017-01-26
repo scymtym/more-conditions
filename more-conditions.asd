@@ -7,39 +7,14 @@
 (cl:defpackage #:more-conditions-system
   (:use
    #:cl
-   #:asdf)
-
-  (:export
-   #:version/list
-   #:version/string))
+   #:asdf))
 
 (cl:in-package #:more-conditions-system)
-
-;;; Version stuff
-
-(defparameter +version-major+ 0
-  "Major component of version number.")
-
-(defparameter +version-minor+ 4
-  "Minor component of version number.")
-
-(defparameter +version-revision+ 5
-  "Revision component of version number.")
-
-(defun version/list ()
-  "Return a version of the form (MAJOR MINOR REVISION)."
-  (list +version-major+ +version-minor+ +version-revision+))
-
-(defun version/string ()
-  "Return a version string of the form \"MAJOR.MINOR.REVISION\"."
-  (format nil "~{~A.~A.~A~}" (version/list)))
-
-;;; System definition
 
 (defsystem :more-conditions
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
   :license     "LLGPLv3" ; see COPYING file for details.
   :description "This system provides some generic condition classes in
                 conjunction with support functions and macros."
@@ -68,11 +43,11 @@
 (defsystem :more-conditions/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
-  :version     #.(version/string)
+  :version     (:read-file-form "version-string.sexp")
   :license     "LLGPLv3" ; see COPYING file for details.
   :description "Unit tests for the more-conditions system."
   :depends-on  ((:version :let-plus        "0.2")
-                (:version :more-conditions #.(version/string))
+                (:version :more-conditions (:read-file-form "version-string.sexp"))
                 (:version :fiveam          "1.3"))
   :encoding    :utf-8
   :components  ((:module     "test"
