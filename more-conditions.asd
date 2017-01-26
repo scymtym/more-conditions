@@ -1,6 +1,6 @@
 ;;;; more-conditions.asd --- System definition for more-conditions.
 ;;;;
-;;;; Copyright (C) 2010-2016 Jan Moringen
+;;;; Copyright (C) 2010-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -63,9 +63,9 @@
 
                 (:static-file "README.org"))
 
-  :in-order-to ((test-op (test-op :more-conditions-test))))
+  :in-order-to ((test-op (test-op :more-conditions/test))))
 
-(defsystem :more-conditions-test
+(defsystem :more-conditions/test
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :maintainer  "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
   :version     #.(version/string)
@@ -82,5 +82,5 @@
                               (:file       "macros")))))
 
 (defmethod perform ((op        test-op)
-                    (component (eql (find-system :more-conditions-test))))
+                    (component (eql (find-system :more-conditions/test))))
   (funcall (read-from-string "more-conditions.test:run-tests")))
