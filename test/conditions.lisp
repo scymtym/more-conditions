@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Unit tests for conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2012-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -458,41 +458,41 @@ See also:
     "???.?? %")
 
   `((:operation :foo)
-    "FOO: ???.?? %"
+    "???.?? % FOO"
     :constructor-args (:foo))
 
   `((:operation :foo :progress nil)
-    "FOO: ???.?? %"
+    "???.?? % FOO"
     :constructor-args (:foo nil))
 
   `((:operation :foo :progress 0)
-    "FOO:   0.00 %"
+    "  0.00 % FOO"
     :constructor-args (:foo 0))
 
   `((:operation :foo :progress 1)
-    "FOO: 100.00 %"
+    "100.00 % FOO"
     :constructor-args (:foo 1))
 
   `((:operation :foo :progress t)
-    "FOO: 100.00 %"
+    "100.00 % FOO"
     :constructor-args (:foo t))
 
   `((:operation :foo :progress .51234)
-    "FOO:  51.23 %"
+    " 51.23 % FOO"
     :constructor-args (:foo .51234 progress-condition)))
 
 (define-condition-suite (simple-progress-condition :constructor progress)
   `((:operation :foo :progress .51234)
-    "FOO:  51.23 %"
+    " 51.23 % FOO"
     :constructor-args (:foo .51234 simple-progress-condition))
 
   `((:operation :foo :progress .51234 :format-control "bar")
-    "FOO:  51.23 %: bar"
+    " 51.23 % FOO: bar"
     :constructor-args (:foo .51234 "bar"))
 
   `((:operation        :foo
      :progress         .51234
      :format-control   "bar: ~A"
      :format-arguments (:baz))
-    "FOO:  51.23 %: bar: BAZ"
+    " 51.23 % FOO: bar: BAZ"
     :constructor-args (:foo .51234 "bar: ~A" :baz)))

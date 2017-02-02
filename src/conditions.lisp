@@ -1,6 +1,6 @@
 ;;;; conditions.lisp --- Conditions provided by the more-conditions system.
 ;;;;
-;;;; Copyright (C) 2011, 2012, 2013, 2014, 2015 Jan Moringen
+;;;; Copyright (C) 2011-2017 Jan Moringen
 ;;;;
 ;;;; Author: Jan Moringen <jmoringe@techfak.uni-bielefeld.de>
 
@@ -285,10 +285,12 @@
 
 (defmethod print-object ((object progress-condition) stream)
   (flet ((do-it ()
-           (format stream "~@<~@[~A: ~
-                           ~]~/more-conditions:print-progress-percentage/~:>"
-                   (progress-condition-operation object)
-                   (progress-condition-progress object))))
+           (format stream "~@<~
+                             ~/more-conditions:print-progress-percentage/~
+                             ~@[ ~A~]~
+                           ~:>"
+                   (progress-condition-progress object)
+                   (progress-condition-operation object))))
     (if *print-escape*
         (print-unreadable-object (object stream :type t :identity t)
           (do-it))
