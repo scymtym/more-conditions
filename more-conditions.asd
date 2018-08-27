@@ -51,4 +51,4 @@
 
 (defmethod perform ((operation test-op)
                     (component (eql (find-system :more-conditions/test))))
-  (funcall (read-from-string "more-conditions.test:run-tests")))
+  (uiop:symbol-call '#:more-conditions.test '#:run-tests))
