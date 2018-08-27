@@ -230,9 +230,9 @@
     (more-conditions:progress :my-operation t))
   #+END_SRC
 
-  The =more-conditions:with-trivial-progress= can be used to indicate
-  execution of long running operations without reporting detailed
-  progress during execution:
+  The =more-conditions:with-trivial-progress= macro can be used to
+  indicate execution of long running operations without reporting
+  detailed progress during execution:
   #+BEGIN_SRC lisp
   (handler-bind ((more-conditions:progress-condition #'princ))
     (more-conditions:with-trivial-progress (:factorial "Computing factorial of ~D" 1000)
