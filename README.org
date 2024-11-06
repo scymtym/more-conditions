@@ -20,9 +20,9 @@
 
   Another aspect are custom simple conditions. The function
   =maybe-print-explanation= is intended to make writing report
-  functions for custom simple conditions easier. See [[*Custom Simple
-  Conditions]] below. =more-conditions= also provides a couple of
-  specific =program-error= s:
+  functions for custom simple conditions easier. See
+  [[*Custom Simple Conditions]] below. =more-conditions= also provides a
+  couple of specific =program-error= s:
   + =program-error=
     + =missing-required-argument=
       + =missing-required-initarg=
